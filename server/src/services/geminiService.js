@@ -2,6 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
 import { getNewsSentimentPrompt } from '../prompts/newsPrompt.js';
+import { getRiskAnalysisPrompt } from '../prompts/riskPrompt.js';
 
 // Initialize the Google GenAI SDK client if the API key is configured
 const ai = env.geminiApiKey && env.geminiApiKey !== 'your_gemini_api_key_here'
@@ -71,6 +72,42 @@ const generateMockSentimentAnalysis = (companyName, articles) => {
     positiveFactors: positiveFactors.slice(0, 3),
     negativeFactors: negativeFactors.slice(0, 3),
     summary: `Mock News Sentiment Analysis: Established a ${sentiment} market sentiment of ${score}/100 for ${companyName} by scanning keyword headlines.`
+  };
+};
+
+/**
+ * Context-aware mock risk analyzer.
+ * Evaluates stock based on financial score and sentiment.
+ */
+const generateMockRiskAnalysis = (companyName, financialScore, sentiment) => {
+  let riskScore = 75; // Default Low-Medium Risk
+
+  if (financialScore < 40 || sentiment === 'Negative') {
+    riskScore = 30; // High Risk
+  } else if (financialScore < 70 || sentiment === 'Neutral') {
+    riskScore = 55; // Medium Risk
+  } else {
+    riskScore = 85; // Low Risk
+  }
+
+  let riskLevel = 'Medium';
+  if (riskScore >= 70) riskLevel = 'Low';
+  else if (riskScore <= 40) riskLevel = 'High';
+
+  return {
+    riskLevel,
+    riskScore,
+    risks: [
+      `Competitive risk: Intense peer execution pressure in the ${companyName} sector.`,
+      `Regulatory risk: Global compliance cost updates and trade changes.`,
+      `Valuation risk: Stretched valuation thresholds relative to near-term targets.`
+    ],
+    mitigationFactors: [
+      `Low leverage and healthy capital structures.`,
+      `High operational cash generation buffers.`,
+      `Moated technology integrations and strong consumer pull.`
+    ],
+    summary: `Mock Risk Analysis: Assessed ${companyName} at a ${riskLevel} Risk level (${riskScore}/100) using quantitative inputs.`
   };
 };
 
@@ -167,12 +204,81 @@ export const analyzeNews = async (companyName, articles) => {
   }
 };
 
-/**
- * Placeholder for future risk analyses (e.g. SEC reports evaluation).
- */
-export const analyzeRisk = async (ticker, financialData) => {
-  console.log(`[Gemini Service] Placeholder analyzeRisk called for: "${ticker}"`);
-  return { success: true, message: 'Risk analysis module activated (Placeholder).' };
+export const analyzeRisk = async ({
+  companyName,
+  financialData,
+  financialScore,
+  newsSummary,
+  sentiment
+}) => {
+  if (!companyName) {
+    throw new AppError('companyName is required to perform risk analysis', 400);
+  }
+
+  // Fallback to mock risk analysis if Gemini is not configured
+  if (!ai) {
+    console.log(`[Gemini Service] API key unconfigured. Deploying mock risk heuristics for "${companyName}"...`);
+    return generateMockRiskAnalysis(companyName, financialScore, sentiment);
+  }
+
+  const prompt = getRiskAnalysisPrompt({
+    companyName,
+    financialData,
+    financialScore,
+    newsSummary,
+    sentiment
+  });
+
+  try {
+    const responseSchema = {
+      type: 'OBJECT',
+      properties: {
+        riskLevel: {
+          type: 'STRING',
+          enum: ['Low', 'Medium', 'High']
+        },
+        riskScore: {
+          type: 'INTEGER'
+        },
+        risks: {
+          type: 'ARRAY',
+          items: { type: 'STRING' }
+        },
+        mitigationFactors: {
+          type: 'ARRAY',
+          items: { type: 'STRING' }
+        },
+        summary: {
+          type: 'STRING'
+        }
+      },
+      required: ['riskLevel', 'riskScore', 'risks', 'mitigationFactors', 'summary']
+    };
+
+    console.log(`[Gemini Service] Dispatching risk evaluation request for "${companyName}" using ${env.geminiModel}...`);
+
+    const result = await callWithRetry(() =>
+      ai.models.generateContent({
+        model: env.geminiModel,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema
+        }
+      })
+    );
+
+    const responseText = result.text;
+    if (!responseText) {
+      throw new Error('Received an empty text block from Google GenAI endpoint during risk check.');
+    }
+
+    return JSON.parse(responseText);
+
+  } catch (error) {
+    console.error(`[Gemini Service Error] Risk API request crashed: ${error.message}. Falling back to mock risk heuristics...`);
+    return generateMockRiskAnalysis(companyName, financialScore, sentiment);
+  }
 };
 
 /**
