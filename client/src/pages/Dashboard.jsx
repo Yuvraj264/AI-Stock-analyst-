@@ -8,6 +8,7 @@ import { RiskCard } from '../components/RiskCard.jsx';
 import { ReportCard } from '../components/ReportCard.jsx';
 import { FinancialBreakdownChart } from '../components/FinancialBreakdownChart.jsx';
 import { ScoreComparisonChart } from '../components/ScoreComparisonChart.jsx';
+import { ExportPdfButton } from '../components/ExportPdfButton.jsx';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { FileText, ArrowLeft, ArrowUpRight, ArrowDownRight, RefreshCw, BarChart2, Shield, Eye, Info } from 'lucide-react';
 
@@ -65,45 +66,50 @@ export const Dashboard = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white pb-12 transition-colors duration-300">
       
-      {/* Header Panel */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 border-b border-slate-200/50 dark:border-slate-800/50">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/"
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white transition-colors duration-200"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-3xl font-extrabold tracking-tight">{analysis.companyName}</h1>
-                {isHistoryRecord && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-900 text-slate-500 border border-slate-250 dark:border-slate-800">
-                    <Info className="h-3.5 w-3.5 text-blue-500" />
-                    Archived Report
-                  </span>
-                )}
+      <div id="pdf-export-area" className="px-4 py-8 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950">
+        <div className="mx-auto max-w-7xl">
+          
+          {/* Header Panel */}
+          <div className="border-b border-slate-200/50 dark:border-slate-800/50 pb-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Link
+                  to="/"
+                  data-html2canvas-ignore="true"
+                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white transition-colors duration-200"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-3xl font-extrabold tracking-tight">{analysis.companyName}</h1>
+                    {isHistoryRecord && (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-900 text-slate-500 border border-slate-250 dark:border-slate-800">
+                        <Info className="h-3.5 w-3.5 text-blue-500" />
+                        Archived Report
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold text-slate-400 mt-0.5">
+                    Ticker Resolved: <span className="text-emerald-500 font-bold">{analysis.ticker}</span>
+                  </p>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-slate-400 mt-0.5">
-                Ticker Resolved: <span className="text-emerald-500 font-bold">{analysis.ticker}</span>
-              </p>
+              <div className="flex items-center gap-2" data-html2canvas-ignore="true">
+                <ExportPdfButton elementId="pdf-export-area" fileName={`${analysis.ticker}-Analysis-Report`} />
+                <Link
+                  to="/"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 shadow-md shadow-emerald-500/10 transition-colors duration-200"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                  New Analysis
+                </Link>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/"
-              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 shadow-md shadow-emerald-500/10 transition-colors duration-200"
-            >
-              <RefreshCw className="h-4 w-4" />
-              New Analysis
-            </Link>
-          </div>
-        </div>
-      </div>
 
-      {/* Main Layout Container */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+          {/* Main Layout Container */}
+          <main className="space-y-8 mt-8">
         
         {/* Row 1: Sub-Score Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -265,7 +271,9 @@ export const Dashboard = () => {
 
         </div>
 
-      </main>
+          </main>
+        </div>
+      </div>
 
     </div>
   );
