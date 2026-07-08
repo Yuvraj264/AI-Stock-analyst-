@@ -1,12 +1,13 @@
 import React from 'react';
-import { DollarSign, Newspaper, ShieldAlert, Award } from 'lucide-react';
+import { DollarSign, Newspaper, ShieldAlert, Award, HelpCircle } from 'lucide-react';
 
 /**
  * Score visualization card with radial/circular gauge ring.
  * Maps score thresholds to customized HSL color-coded states.
  */
 export const ScoreCard = ({ title, score, maxScore = 100, type = 'financial' }) => {
-  const normalizedScore = typeof score === 'number' ? score : 0;
+  const parsedScore = Number(score);
+  const normalizedScore = isNaN(parsedScore) ? 0 : parsedScore;
   
   // Custom theme mapping based on agent type
   const themeMap = {
@@ -45,12 +46,12 @@ export const ScoreCard = ({ title, score, maxScore = 100, type = 'financial' }) 
   };
 
   const currentTheme = themeMap[type] || themeMap.financial;
-  const IconComponent = currentTheme.icon;
+  const IconComponent = currentTheme.icon || HelpCircle;
 
   // SVG Gauge calculations
-  const radius = 38;
+  const radius = 34;
   const circumference = 2 * Math.PI * radius;
-  const percentage = (normalizedScore / maxScore) * 100;
+  const percentage = Math.min(Math.max((normalizedScore / maxScore) * 100, 0), 100);
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
@@ -62,12 +63,12 @@ export const ScoreCard = ({ title, score, maxScore = 100, type = 'financial' }) 
           <IconComponent className="h-6 w-6" />
         </div>
         <div>
-          <span className="text-sm font-semibold text-slate-400 block tracking-wide uppercase">
+          <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">
             {title}
           </span>
           <span className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 block">
             {normalizedScore}
-            <span className="text-slate-400 dark:text-slate-600 text-sm font-semibold">
+            <span className="text-slate-400 dark:text-slate-600 text-sm font-semibold ml-0.5">
               /{maxScore}
             </span>
           </span>
@@ -76,7 +77,7 @@ export const ScoreCard = ({ title, score, maxScore = 100, type = 'financial' }) 
 
       {/* SVG Radial Gauge */}
       <div className="relative h-20 w-20 flex items-center justify-center">
-        <svg className="h-full w-full -rotate-90">
+        <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
           {/* Base Track */}
           <circle
             cx="40"
@@ -97,7 +98,7 @@ export const ScoreCard = ({ title, score, maxScore = 100, type = 'financial' }) 
             strokeLinecap="round"
           />
         </svg>
-        <span className="absolute text-sm font-extrabold text-slate-700 dark:text-slate-300">
+        <span className="absolute text-xs font-extrabold text-slate-700 dark:text-slate-300">
           {Math.round(percentage)}%
         </span>
       </div>
