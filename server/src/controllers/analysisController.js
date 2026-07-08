@@ -1,10 +1,10 @@
 import { graph } from '../graph/analysisGraph.js';
-import { Analysis } from '../models/Analysis.js';
+import { saveAnalysis, getAllAnalyses } from '../services/analysisService.js';
 import { AppError } from '../utils/AppError.js';
 
 /**
  * Executes a new stock investment analysis by triggering the LangGraph agent network.
- * Stores the final structured document in MongoDB.
+ * Delegates database persistence to the Analysis Service.
  * 
  * POST /api/analysis
  */
@@ -21,22 +21,8 @@ export const runAnalysis = async (req, res, next) => {
     // Invoke the compiled LangGraph workflow
     const finalState = await graph.invoke({ companyName });
 
-    // Build model schema parameters matching Analysis.js
-    const analysisDoc = {
-      companyName: finalState.companyName,
-      ticker: finalState.ticker,
-      financialScore: finalState.financialScore,
-      newsScore: finalState.newsScore,
-      riskScore: finalState.riskScore,
-      finalScore: finalState.finalScore,
-      recommendation: finalState.recommendation,
-      confidence: finalState.confidence,
-      reasoning: finalState.report, // The compiled markdown report acts as the qualitative reasoning summary
-      risks: finalState.risks || []
-    };
-
-    // Save output document to database
-    const savedAnalysis = await Analysis.create(analysisDoc);
+    // Save outputs using analysisService
+    const savedAnalysis = await saveAnalysis(finalState);
 
     console.log(`[Backend API] Successfully completed and saved analysis for "${savedAnalysis.ticker}" (ID: ${savedAnalysis._id})`);
 
@@ -56,13 +42,13 @@ export const runAnalysis = async (req, res, next) => {
 };
 
 /**
- * Retrieves the reverse chronological history of all runs from MongoDB.
+ * Retrieves the reverse chronological history of all runs via the Analysis Service.
  * 
  * GET /api/analysis
  */
 export const getAnalysisHistory = async (req, res, next) => {
   try {
-    const history = await Analysis.find().sort({ createdAt: -1 });
+    const history = await getAllAnalyses();
     
     res.status(200).json({
       success: true,
