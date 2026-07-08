@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { performAnalysis, getHistory } from '../services/api.js';
+import { performAnalysis, getHistory, deleteHistoryItem } from '../services/api.js';
 
 /**
  * Custom React Hook that coordinates analysis executions, database history records,
@@ -67,6 +67,31 @@ export const useAnalysis = () => {
     }
   }, []);
 
+  /**
+   * Deletes an analysis record by its ID.
+   */
+  const deleteAnalysisItem = useCallback(async (id) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await deleteHistoryItem(id);
+      if (response && response.success) {
+        // Remove item from state
+        setHistory((prev) => prev.filter((item) => item._id !== id));
+        return true;
+      } else {
+        throw new Error(response.message || 'Failed to delete record.');
+      }
+    } catch (err) {
+      console.error('[useAnalysis Hook Error] deleteAnalysisItem failed:', err);
+      const errMsg = err.response?.data?.message || err.message || 'An error occurred deleting the analysis record.';
+      setError(errMsg);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   return {
     currentAnalysis,
     history,
@@ -74,6 +99,7 @@ export const useAnalysis = () => {
     error,
     analyzeStock,
     fetchHistory,
+    deleteAnalysisItem,
     setCurrentAnalysis
   };
 };

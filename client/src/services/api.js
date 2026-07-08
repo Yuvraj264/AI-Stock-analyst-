@@ -13,7 +13,7 @@ const api = axios.create({
  * @param {string} companyName - Name of the target company
  */
 export const performAnalysis = async (companyName) => {
-  const response = await api.post('/api/analysis', { companyName });
+  const response = await api.post('/api/analyze', { companyName });
   return response.data;
 };
 
@@ -21,7 +21,16 @@ export const performAnalysis = async (companyName) => {
  * Fetch reverse chronological runs from the database.
  */
 export const getHistory = async () => {
-  const response = await api.get('/api/analysis');
+  const response = await api.get('/api/history');
+  return response.data;
+};
+
+/**
+ * Delete a specific stock analysis record from the database.
+ * @param {string} id - The MongoDB ObjectId of the record
+ */
+export const deleteHistoryItem = async (id) => {
+  const response = await api.delete(`/api/history/${id}`);
   return response.data;
 };
 
@@ -36,5 +45,6 @@ export const getHealth = async () => {
 export default {
   performAnalysis,
   getHistory,
+  deleteHistoryItem,
   getHealth
 };
