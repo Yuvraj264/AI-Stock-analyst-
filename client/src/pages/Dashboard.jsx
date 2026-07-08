@@ -6,6 +6,8 @@ import { StrengthsCard } from '../components/StrengthsCard.jsx';
 import { WeaknessCard } from '../components/WeaknessCard.jsx';
 import { RiskCard } from '../components/RiskCard.jsx';
 import { ReportCard } from '../components/ReportCard.jsx';
+import { FinancialBreakdownChart } from '../components/FinancialBreakdownChart.jsx';
+import { ScoreComparisonChart } from '../components/ScoreComparisonChart.jsx';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { FileText, ArrowLeft, ArrowUpRight, ArrowDownRight, RefreshCw, BarChart2, Shield, Eye, Info } from 'lucide-react';
 
@@ -190,7 +192,21 @@ export const Dashboard = () => {
 
         </div>
 
-        {/* Row 3: Metrics summary & Detailed Analysis Cards Grid */}
+        {/* Row 3: Analytical Charts Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <FinancialBreakdownChart
+            score={analysis.financialScore}
+            breakdown={analysis.breakdown}
+          />
+          <ScoreComparisonChart
+            finalScore={analysis.finalScore}
+            financialScore={analysis.financialScore}
+            newsScore={analysis.newsScore}
+            riskScore={analysis.riskScore}
+          />
+        </div>
+
+        {/* Row 4: Metrics summary & Detailed Analysis Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* Left Columns: Qualitative Detail Lists */}
