@@ -5,6 +5,7 @@ import { runFinancialAgent } from '../agents/financialAgent.js';
 import { runNewsAgent } from '../agents/newsAgent.js';
 import { runRiskAgent } from '../agents/riskAgent.js';
 import { runReportAgent } from '../agents/reportAgent.js';
+import { runDecisionAgent } from '../agents/decisionAgent.js';
 import { calculateFinancialScore } from '../services/scoringService.js';
 import { analyzeNews } from '../services/geminiService.js';
 import { AppError } from '../utils/AppError.js';
@@ -108,46 +109,20 @@ const riskNode = async (state) => {
   }
 };
 
-/**
- * 5. Decision Agent Node
- * Merges scores, computes risk-adjusted recommendations, and confidence margins.
- */
 const decisionNode = async (state) => {
   try {
-    console.log(`[Graph Node: Decision] Formulating recommendation for "${state.ticker}"...`);
+    console.log(`[Graph Node: Decision] Formulating recommendation using Decision Agent for "${state.ticker}"...`);
 
-    // Weighted final score: 50% Financials, 25% News, 25% Risk
-    const finalScore = Math.round(
-      (state.financialScore * 0.5) +
-      (state.newsScore * 0.25) +
-      (state.riskScore * 0.25)
-    );
-
-    // Rule-based risk-adjusted recommendation table
-    let recommendation = 'HOLD';
-    if (finalScore >= 80) {
-      recommendation = state.riskLevel === 'High' ? 'BUY' : 'STRONG_BUY';
-    } else if (finalScore >= 65) {
-      recommendation = state.riskLevel === 'High' ? 'HOLD' : 'BUY';
-    } else if (finalScore >= 45) {
-      recommendation = 'HOLD';
-    } else if (finalScore >= 30) {
-      recommendation = 'SELL';
-    } else {
-      recommendation = 'STRONG_SELL';
-    }
-
-    // Confidence index matches score convergence and checks risk levels
-    const scoreVariance = Math.abs(state.financialScore - state.newsScore);
-    const riskDeduction = state.riskLevel === 'High' ? 0.15 : 0;
-    const confidence = parseFloat(
-      Math.max(0.5, 1.0 - (scoreVariance / 200) - riskDeduction).toFixed(2)
-    );
+    const result = await runDecisionAgent({
+      financialScore: state.financialScore,
+      newsScore: state.newsScore,
+      riskScore: state.riskScore
+    });
 
     return {
-      finalScore,
-      recommendation,
-      confidence
+      finalScore: result.finalScore,
+      recommendation: result.recommendation,
+      confidence: result.confidence / 100 // Map 0-100 back to 0.0 - 1.0 schema constraint range
     };
   } catch (error) {
     console.error('[Graph Node Error] Decision Node failed:', error.message);

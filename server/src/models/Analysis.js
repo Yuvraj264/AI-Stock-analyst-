@@ -38,7 +38,7 @@ const AnalysisSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Recommendation is required'],
       enum: {
-        values: ['BUY', 'STRONG_BUY', 'HOLD', 'SELL', 'STRONG_SELL', 'UNDER_REVIEW'],
+        values: ['INVEST', 'HOLD', 'PASS', 'BUY', 'STRONG_BUY', 'SELL', 'STRONG_SELL', 'UNDER_REVIEW'],
         message: '{VALUE} is not a valid recommendation type'
       },
       trim: true,
