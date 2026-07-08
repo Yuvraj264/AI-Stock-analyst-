@@ -3,6 +3,7 @@ import cors from 'cors';
 import { requestLogger } from './middleware/requestLogger.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import healthRouter from './routes/health.js';
+import analysisRouter from './routes/analysis.js';
 import { AppError } from './utils/AppError.js';
 
 const app = express();
@@ -19,6 +20,7 @@ app.use(requestLogger);
 
 // 4. Mount api endpoints
 app.use('/api', healthRouter);
+app.use('/api/analysis', analysisRouter);
 
 // 5. Handle unhandled/wildcard routes with custom 404 error
 app.all('*', (req, res, next) => {
