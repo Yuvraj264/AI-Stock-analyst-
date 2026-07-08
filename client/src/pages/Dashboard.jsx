@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ScoreCard } from '../components/ScoreCard.jsx';
 import { RecommendationCard } from '../components/RecommendationCard.jsx';
+import { StrengthsCard } from '../components/StrengthsCard.jsx';
+import { WeaknessCard } from '../components/WeaknessCard.jsx';
+import { RiskCard } from '../components/RiskCard.jsx';
+import { ReportCard } from '../components/ReportCard.jsx';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { FileText, ArrowLeft, ArrowUpRight, ArrowDownRight, RefreshCw, BarChart2, Shield, Eye, Info } from 'lucide-react';
 
@@ -186,217 +190,61 @@ export const Dashboard = () => {
 
         </div>
 
-        {/* Row 3: Metrics summary & Qualitative Panels */}
+        {/* Row 3: Metrics summary & Detailed Analysis Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Left Columns: Qualitative Lists */}
-          <div className="lg:col-span-2 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md overflow-hidden">
+          {/* Left Columns: Qualitative Detail Lists */}
+          <div className="lg:col-span-2 space-y-8">
             
-            {/* Tabs Controller */}
-            <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/40">
-              <button
-                onClick={() => setActiveTab('financial')}
-                className={`flex items-center gap-1.5 px-6 py-4 text-sm font-semibold transition-all border-b-2 ${
-                  activeTab === 'financial'
-                    ? 'border-emerald-500 text-emerald-500 bg-white dark:bg-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <BarChart2 className="h-4 w-4" />
-                Financial Ratios
-              </button>
-              <button
-                onClick={() => setActiveTab('sentiment')}
-                className={`flex items-center gap-1.5 px-6 py-4 text-sm font-semibold transition-all border-b-2 ${
-                  activeTab === 'sentiment'
-                    ? 'border-emerald-500 text-emerald-500 bg-white dark:bg-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <Eye className="h-4 w-4" />
-                Market Sentiment
-              </button>
-              <button
-                onClick={() => setActiveTab('risks')}
-                className={`flex items-center gap-1.5 px-6 py-4 text-sm font-semibold transition-all border-b-2 ${
-                  activeTab === 'risks'
-                    ? 'border-emerald-500 text-emerald-500 bg-white dark:bg-slate-900'
-                    : 'border-transparent text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-                }`}
-              >
-                <Shield className="h-4 w-4" />
-                Moat & Risks
-              </button>
-            </div>
-
-            {/* Content Body */}
-            <div className="p-6">
-              {activeTab === 'financial' && (
-                <div className="space-y-6">
-                  {/* Financial Stats Grid */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80">
-                      <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">PE Ratio</span>
-                      <span className="text-lg font-bold text-slate-850 dark:text-slate-200 mt-1 block">
-                        {metrics.peRatio || 'N/A'}
-                      </span>
-                    </div>
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80">
-                      <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">YoY Growth</span>
-                      <span className="text-lg font-bold text-slate-850 dark:text-slate-200 mt-1 block">
-                        {typeof metrics.revenueGrowth === 'number'
-                          ? `${(metrics.revenueGrowth * 100).toFixed(2)}%`
-                          : 'N/A'}
-                      </span>
-                    </div>
-                    <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800/80">
-                      <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">Return on Equity</span>
-                      <span className="text-lg font-bold text-slate-850 dark:text-slate-200 mt-1 block">
-                        {typeof metrics.roe === 'number' ? `${(metrics.roe * 100).toFixed(2)}%` : 'N/A'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-bold text-sm text-emerald-500 uppercase tracking-wider mb-2">Strengths</h4>
-                      <ul className="space-y-2">
-                        {analysis.strengths && analysis.strengths.length > 0 ? (
-                          analysis.strengths.map((s, idx) => (
-                            <li key={idx} className="flex gap-2 items-start text-sm text-slate-600 dark:text-slate-400 font-medium">
-                              <span className="text-emerald-500 font-bold mt-0.5">✓</span>
-                              {s}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-sm text-slate-400/85">
-                            {isHistoryRecord ? 'Detailed strengths archived.' : 'None identified.'}
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-rose-500 uppercase tracking-wider mb-2">Weaknesses</h4>
-                      <ul className="space-y-2">
-                        {analysis.weaknesses && analysis.weaknesses.length > 0 ? (
-                          analysis.weaknesses.map((w, idx) => (
-                            <li key={idx} className="flex gap-2 items-start text-sm text-slate-600 dark:text-slate-400 font-medium">
-                              <span className="text-rose-500 font-bold mt-0.5">✗</span>
-                              {w}
-                            </li>
-                          ))
-                        ) : (
-                          <li className="text-sm text-slate-400/85">
-                            {isHistoryRecord ? 'Detailed weaknesses archived.' : 'None identified.'}
-                          </li>
-                        )}
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'sentiment' && (
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-bold text-sm text-slate-400 uppercase tracking-wider mb-4">News Catalysts</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h5 className="text-xs font-bold text-emerald-500 uppercase tracking-wide mb-2">Positive Drivers</h5>
-                        <ul className="space-y-2">
-                          {analysis.positiveFactors && analysis.positiveFactors.length > 0 ? (
-                            analysis.positiveFactors.map((f, idx) => (
-                              <li key={idx} className="flex gap-2 items-start text-sm text-slate-600 dark:text-slate-400 font-medium">
-                                <span className="text-emerald-500 font-bold mt-0.5">▲</span>
-                                {f}
-                              </li>
-                            ))
-                          ) : (
-                            <li className="text-sm text-slate-400/85">
-                              {isHistoryRecord ? 'Detailed catalysts archived.' : 'None identified.'}
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                      <div>
-                        <h5 className="text-xs font-bold text-rose-500 uppercase tracking-wide mb-2">Negative Pressures</h5>
-                        <ul className="space-y-2">
-                          {analysis.negativeFactors && analysis.negativeFactors.length > 0 ? (
-                            analysis.negativeFactors.map((f, idx) => (
-                              <li key={idx} className="flex gap-2 items-start text-sm text-slate-600 dark:text-slate-400 font-medium">
-                                <span className="text-rose-500 font-bold mt-0.5">▼</span>
-                                {f}
-                              </li>
-                            ))
-                          ) : (
-                            <li className="text-sm text-slate-400/85">
-                              {isHistoryRecord ? 'Detailed negative factors archived.' : 'None identified.'}
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'risks' && (
-                <div className="space-y-6">
-                  <div>
-                    <h4 className="font-bold text-sm text-amber-500 uppercase tracking-wider mb-2">Identified Vulnerability Points</h4>
-                    <ul className="space-y-2">
-                      {analysis.risks && analysis.risks.length > 0 ? (
-                        analysis.risks.map((r, idx) => (
-                          <li key={idx} className="flex gap-2 items-start text-sm text-slate-600 dark:text-slate-400 font-medium">
-                            <span className="text-amber-500 font-bold mt-0.5">⚠</span>
-                            {r}
-                          </li>
-                        ))
-                      ) : (
-                        <li className="text-sm text-slate-400">None identified.</li>
-                      )}
-                    </ul>
-                  </div>
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* Right Column: Markdown executive report viewer */}
-          <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md flex flex-col">
-            <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-4 flex items-center gap-1.5">
-              <FileText className="h-4 w-4 text-emerald-500" />
-              AI Compiled Report
-            </h3>
-            
-            {/* Scrollable Report Content block */}
-            <div className="h-[28rem] overflow-y-auto pr-2 text-sm leading-relaxed text-slate-600 dark:text-slate-350 font-medium space-y-4 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
-              <div className="prose prose-slate dark:prose-invert max-w-none text-xs">
-                {reportText ? (
-                  reportText.split('\n').map((line, idx) => {
-                    if (line.startsWith('# ')) {
-                      return <h1 key={idx} className="text-lg font-black text-slate-900 dark:text-white mt-4 mb-2">{line.replace('# ', '')}</h1>;
-                    }
-                    if (line.startsWith('## ')) {
-                      return <h2 key={idx} className="text-sm font-bold text-slate-855 dark:text-slate-150 mt-4 mb-1.5 uppercase tracking-wide">{line.replace('## ', '')}</h2>;
-                    }
-                    if (line.startsWith('### ')) {
-                      return <h3 key={idx} className="text-xs font-bold text-emerald-500 dark:text-emerald-450 mt-3 mb-1 uppercase tracking-wide">{line.replace('### ', '')}</h3>;
-                    }
-                    if (line.startsWith('* ') || line.startsWith('- ')) {
-                      return <li key={idx} className="list-disc list-inside ml-2 py-0.5 text-slate-500 dark:text-slate-400">{line.substring(2)}</li>;
-                    }
-                    if (line.trim() === '---') {
-                      return <hr key={idx} className="border-slate-100 dark:border-slate-800 my-4" />;
-                    }
-                    return <p key={idx} className="mb-2 text-slate-550 dark:text-slate-400">{line}</p>;
-                  })
-                ) : (
-                  <p className="text-slate-400">No qualitative summary compiled.</p>
-                )}
+            {/* Core Ratios Quick Bar */}
+            <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md">
+              <div className="text-center">
+                <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">PE Ratio</span>
+                <span className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">
+                  {metrics.peRatio || 'N/A'}
+                </span>
+              </div>
+              <div className="text-center border-x border-slate-100 dark:border-slate-800/80">
+                <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">YoY Growth</span>
+                <span className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">
+                  {typeof metrics.revenueGrowth === 'number'
+                    ? `${(metrics.revenueGrowth * 100).toFixed(2)}%`
+                    : 'N/A'}
+                </span>
+              </div>
+              <div className="text-center">
+                <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">ROE</span>
+                <span className="text-sm sm:text-base font-extrabold text-slate-850 dark:text-slate-200 mt-1 block">
+                  {typeof metrics.roe === 'number' ? `${(metrics.roe * 100).toFixed(2)}%` : 'N/A'}
+                </span>
               </div>
             </div>
+
+            {/* Strengths & Weaknesses Grids */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <StrengthsCard
+                strengths={analysis.strengths}
+                positiveFactors={analysis.positiveFactors}
+                isArchive={isHistoryRecord}
+              />
+              <WeaknessCard
+                weaknesses={analysis.weaknesses}
+                negativeFactors={analysis.negativeFactors}
+                isArchive={isHistoryRecord}
+              />
+            </div>
+
+            {/* Threat & Risk Card */}
+            <RiskCard
+              risks={analysis.risks}
+              mitigationFactors={analysis.mitigationFactors}
+              isArchive={isHistoryRecord}
+            />
+          </div>
+
+          {/* Right Column: AI Research Report Card */}
+          <div className="lg:col-span-1">
+            <ReportCard report={reportText} />
           </div>
 
         </div>
