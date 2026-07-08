@@ -1,38 +1,75 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalysis } from '../hooks/useAnalysis.js';
+import { ComparisonTable } from '../components/ComparisonTable.jsx';
+import { ComparisonSummary } from '../components/ComparisonSummary.jsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowLeft, RefreshCw, Layers, Plus, X, Award, ShieldAlert, Newspaper, DollarSign } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Layers, Sparkles, HelpCircle } from 'lucide-react';
 
 /**
  * Side-by-Side Stock Comparison Page.
- * Allows comparing scores and quantitative metrics from history logs.
+ * Coordinates input queries, triggers parallel LangGraph workflows, and displays tables & charts.
  */
 export const Compare = () => {
   const navigate = useNavigate();
-  const { history, fetchHistory, loading, error } = useAnalysis();
-  const [selectedStocks, setSelectedStocks] = useState([]);
+  const { history, fetchHistory, analyzeStock, loading: apiLoading, error: apiError } = useAnalysis();
+
+  const [inputA, setInputA] = useState('');
+  const [inputB, setInputB] = useState('');
+  
+  const [stockA, setStockA] = useState(null);
+  const [stockB, setStockB] = useState(null);
+  const [localLoading, setLocalLoading] = useState(false);
+  const [localError, setLocalError] = useState(null);
 
   useEffect(() => {
     fetchHistory();
   }, [fetchHistory]);
 
-  const handleAddStock = (stock) => {
-    if (selectedStocks.some((s) => s._id === stock._id)) return;
-    if (selectedStocks.length >= 3) {
-      alert('You can compare a maximum of 3 stocks simultaneously.');
+  const handleQuickSelect = (record, target) => {
+    if (target === 'A') {
+      setStockA(record);
+      setInputA(record.companyName);
+    } else {
+      setStockB(record);
+      setInputB(record.companyName);
+    }
+  };
+
+  const handleCompare = async (e) => {
+    e.preventDefault();
+    if (!inputA.trim() || !inputB.trim()) {
+      setLocalError('Both Company A and Company B inputs are required.');
       return;
     }
-    setSelectedStocks((prev) => [...prev, stock]);
+
+    setLocalLoading(true);
+    setLocalError(null);
+
+    try {
+      console.log(`[Compare Page] Starting comparison runs for "${inputA}" and "${inputB}"...`);
+      
+      // Execute LangGraph pipelines concurrently for both inputs in parallel
+      const [resA, resB] = await Promise.all([
+        analyzeStock(inputA),
+        analyzeStock(inputB)
+      ]);
+
+      console.log(`[Compare Page] Completed parallel analysis pipelines successfully.`);
+      setStockA(resA);
+      setStockB(resB);
+    } catch (err) {
+      console.error('[Compare Page Error] Live comparison failed:', err);
+      setLocalError(err.message || 'Analysis pipeline execution failed for one or both companies.');
+    } finally {
+      setLocalLoading(false);
+    }
   };
 
-  const handleRemoveStock = (id) => {
-    setSelectedStocks((prev) => prev.filter((s) => s._id !== id));
-  };
-
-  // Reformat selected stocks data for Recharts BarChart comparison
-  // Chart structure: [{ category: 'Final', StockA: 85, StockB: 60, ... }]
+  // Format compared stock data for Recharts BarChart rendering
   const getChartData = () => {
+    if (!stockA || !stockB) return [];
+    
     const categories = [
       { key: 'finalScore', label: 'Consensus Rating' },
       { key: 'financialScore', label: 'Financial Health' },
@@ -40,16 +77,16 @@ export const Compare = () => {
       { key: 'riskScore', label: 'Risk Safety' }
     ];
 
-    return categories.map((cat) => {
-      const dataPoint = { category: cat.label };
-      selectedStocks.forEach((stock) => {
-        dataPoint[stock.ticker] = stock[cat.key];
-      });
-      return dataPoint;
-    });
+    return categories.map((cat) => ({
+      category: cat.label,
+      [stockA.ticker]: stockA[cat.key],
+      [stockB.ticker]: stockB[cat.key]
+    }));
   };
 
-  const colors = ['#10b981', '#3b82f6', '#f59e0b'];
+  const isComparisonReady = stockA && stockB;
+  const isLoading = apiLoading || localLoading;
+  const activeError = apiError || localError;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white pb-12 transition-colors duration-300">
@@ -67,56 +104,110 @@ export const Compare = () => {
             <div>
               <h1 className="text-3xl font-extrabold tracking-tight">Compare Stocks</h1>
               <p className="text-sm font-semibold text-slate-400 mt-0.5">
-                Select and compare up to 3 stocks from analysis history
+                Run comparative multi-agent analyses side-by-side
               </p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Body Grid */}
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Main Body */}
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 space-y-8">
         
-        {/* Step 1: Active comparison selection top bar */}
-        <div className="mb-8">
-          <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-3 flex items-center gap-1.5">
+        {/* Step 1: Input Targets */}
+        <form onSubmit={handleCompare} className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 shadow-md">
+          <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-4 flex items-center gap-1.5">
             <Layers className="h-4 w-4 text-emerald-500" />
-            Selected Stocks ({selectedStocks.length}/3)
+            1. Select or Enter Target Stocks
           </h3>
-          
-          <div className="flex flex-wrap gap-4 items-center min-h-[4.5rem] p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 shadow-sm">
-            {selectedStocks.length === 0 ? (
-              <span className="text-sm text-slate-400 font-semibold px-2">
-                Click stocks in the selection pool below to start comparing
-              </span>
-            ) : (
-              selectedStocks.map((stock, idx) => (
-                <div
-                  key={stock._id}
-                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 font-bold text-sm shadow-sm"
-                >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: colors[idx] }}></span>
-                  <span className="text-slate-850 dark:text-slate-200">{stock.ticker}</span>
-                  <button
-                    onClick={() => handleRemoveStock(stock._id)}
-                    className="text-slate-400 hover:text-slate-950 dark:hover:text-white transition-colors duration-200 ml-1.5"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
 
-        {/* Dynamic score compare graphs */}
-        {selectedStocks.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-            
-            {/* Chart */}
-            <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Input A */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wide">Company A</label>
+              <input
+                type="text"
+                placeholder="Enter Company Name or Ticker (e.g. Tesla)"
+                value={inputA}
+                onChange={(e) => setInputA(e.target.value)}
+                disabled={isLoading}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-sm"
+              />
+              <span className="text-[10px] text-slate-400 font-medium block">
+                {stockA ? `Selected: ${stockA.companyName} (${stockA.ticker})` : 'Or select from selection pool below.'}
+              </span>
+            </div>
+
+            {/* Input B */}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wide">Company B</label>
+              <input
+                type="text"
+                placeholder="Enter Company Name or Ticker (e.g. Microsoft)"
+                value={inputB}
+                onChange={(e) => setInputB(e.target.value)}
+                disabled={isLoading}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-sm"
+              />
+              <span className="text-[10px] text-slate-400 font-medium block">
+                {stockB ? `Selected: ${stockB.companyName} (${stockB.ticker})` : 'Or select from selection pool below.'}
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              disabled={isLoading || !inputA.trim() || !inputB.trim()}
+              className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-emerald-500 text-white hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 dark:disabled:bg-slate-850 dark:disabled:text-slate-600 shadow-md shadow-emerald-500/10 transition-all cursor-pointer"
+            >
+              {isLoading ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  Running Parallel Analyses...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  Compare Live
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+
+        {/* Error Notice */}
+        {activeError && (
+          <div className="p-4 rounded-xl border border-rose-200/50 bg-rose-50 text-rose-600 text-sm font-semibold max-w-md mx-auto text-center dark:border-rose-900/30 dark:bg-rose-950/20 dark:text-rose-400">
+            {activeError}
+          </div>
+        )}
+
+        {/* Loading Spinner */}
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-12">
+            <RefreshCw className="h-8 w-8 text-emerald-500 animate-spin mb-4" />
+            <span className="text-sm font-semibold text-slate-400">Running multi-agent analysis on both companies concurrently...</span>
+          </div>
+        )}
+
+        {/* Step 2: Comparison Dashboard Output */}
+        {isComparisonReady && !isLoading && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Matrices */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <ComparisonTable stockA={stockA} stockB={stockB} />
+              </div>
+              <div className="lg:col-span-1">
+                <ComparisonSummary stockA={stockA} stockB={stockB} />
+              </div>
+            </div>
+
+            {/* Recharts comparison bar chart */}
+            <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md">
               <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-4">
-                Score Comparison
+                Core Metrics Score Bar-Chart Comparison
               </h3>
               <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -145,112 +236,54 @@ export const Compare = () => {
                       }}
                     />
                     <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 12, fontWeight: 700 }} />
-                    {selectedStocks.map((stock, idx) => (
-                      <Bar
-                        key={stock._id}
-                        dataKey={stock.ticker}
-                        fill={colors[idx]}
-                        radius={[4, 4, 0, 0]}
-                      />
-                    ))}
+                    <Bar dataKey={stockA.ticker} fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey={stockB.ticker} fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
-
-            {/* Side-by-Side metrics table panel */}
-            <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md flex flex-col justify-between">
-              <div>
-                <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-4">
-                  Comparison Matrix
-                </h3>
-                <div className="divide-y divide-slate-100 dark:divide-slate-800 space-y-4">
-                  
-                  {/* Rating row */}
-                  <div className="pt-2">
-                    <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">Consensus Rating</span>
-                    <div className="flex gap-4 mt-2 font-bold text-sm">
-                      {selectedStocks.map((stock, idx) => (
-                        <div key={stock._id} className="flex-1">
-                          <span style={{ color: colors[idx] }}>{stock.ticker}:</span>{' '}
-                          <span className="block mt-0.5 text-slate-800 dark:text-slate-200">
-                            {stock.recommendation}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Risks row */}
-                  <div className="pt-4">
-                    <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">Key Risks Count</span>
-                    <div className="flex gap-4 mt-2 font-bold text-sm">
-                      {selectedStocks.map((stock, idx) => (
-                        <div key={stock._id} className="flex-1">
-                          <span style={{ color: colors[idx] }}>{stock.ticker}:</span>{' '}
-                          <span className="block mt-0.5 text-slate-800 dark:text-slate-200">
-                            {stock.risks?.length || 0} Risk Factors
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
-
           </div>
         )}
 
         {/* Selection Pool Container */}
         <div>
           <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-4">
-            Analysis Selection Pool
+            Analysis Selection Pool (Historical Runs)
           </h3>
 
-          {loading && history.length === 0 ? (
-            <div className="flex items-center justify-center py-10">
-              <RefreshCw className="h-6 w-6 text-emerald-500 animate-spin" />
-            </div>
-          ) : error ? (
-            <div className="p-4 rounded-xl border border-red-200/50 bg-red-50 text-red-600 text-sm font-semibold max-w-md mx-auto text-center dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
-              {error}
-            </div>
-          ) : history.length === 0 ? (
-            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/80 text-center text-slate-400 font-semibold text-sm">
-              Please analyze some companies on the Home page first to add them to the pool.
+          {history.length === 0 ? (
+            <div className="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-105 dark:border-slate-800/80 text-center text-slate-400 font-semibold text-sm">
+              Please analyze some companies on the Home page first to populate this quick selection pool.
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {history.map((record) => {
-                const isSelected = selectedStocks.some((s) => s._id === record._id);
-                return (
-                  <button
-                    key={record._id}
-                    onClick={() => handleAddStock(record)}
-                    disabled={isSelected}
-                    className={`flex items-center justify-between p-4 rounded-xl border text-left font-bold text-sm shadow-sm transition-all duration-200 select-none ${
-                      isSelected
-                        ? 'bg-slate-50 border-slate-200 text-slate-400 opacity-60 dark:bg-slate-950 dark:border-slate-850'
-                        : 'bg-white border-slate-150 text-slate-700 hover:border-emerald-500/40 hover:-translate-y-0.5 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-300 dark:hover:border-emerald-500/40'
-                    }`}
-                  >
-                    <div>
-                      <span className="block text-slate-800 dark:text-white font-bold">{record.ticker}</span>
-                      <span className="text-[10px] text-slate-450 dark:text-slate-500 mt-0.5 block truncate max-w-[130px]">
-                        {record.companyName}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-extrabold text-slate-600 dark:text-slate-400">
-                        {record.finalScore}
-                      </span>
-                      {!isSelected && <Plus className="h-4 w-4 text-emerald-500" />}
-                    </div>
-                  </button>
-                );
-              })}
+              {history.map((record) => (
+                <div
+                  key={record._id}
+                  className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 dark:border-slate-800 shadow-sm font-bold text-sm"
+                >
+                  <div className="min-w-0 pr-2">
+                    <span className="block text-slate-800 dark:text-white font-bold truncate">{record.companyName}</span>
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">
+                      Ticker: <span className="text-emerald-500 font-extrabold">{record.ticker}</span>
+                    </span>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button
+                      onClick={() => handleQuickSelect(record, 'A')}
+                      className="px-2 py-1 text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded dark:bg-emerald-950/25 dark:text-emerald-450 dark:border-emerald-900 transition-colors cursor-pointer"
+                    >
+                      A
+                    </button>
+                    <button
+                      onClick={() => handleQuickSelect(record, 'B')}
+                      className="px-2 py-1 text-[10px] bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 rounded dark:bg-blue-950/25 dark:text-blue-450 dark:border-blue-900 transition-colors cursor-pointer"
+                    >
+                      B
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
