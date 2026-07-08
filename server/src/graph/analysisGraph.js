@@ -4,6 +4,7 @@ import { runResearchAgent } from '../agents/researchAgent.js';
 import { runFinancialAgent } from '../agents/financialAgent.js';
 import { runNewsAgent } from '../agents/newsAgent.js';
 import { runRiskAgent } from '../agents/riskAgent.js';
+import { runReportAgent } from '../agents/reportAgent.js';
 import { calculateFinancialScore } from '../services/scoringService.js';
 import { analyzeNews } from '../services/geminiService.js';
 import { AppError } from '../utils/AppError.js';
@@ -160,72 +161,25 @@ const decisionNode = async (state) => {
  */
 const reportNode = async (state) => {
   try {
-    console.log(`[Graph Node: Report] Generating markdown research report for "${state.ticker}"...`);
+    console.log(`[Graph Node: Report] Compiling investment report using Report Agent for "${state.ticker}"...`);
 
-    const metrics = state.financialData?.metrics || {};
-    const strengths = state.strengths || [];
-    const weaknesses = state.weaknesses || [];
-    const positiveFactors = state.positiveFactors || [];
-    const negativeFactors = state.negativeFactors || [];
-    const risks = state.risks || [];
-    const mitigationFactors = state.mitigationFactors || [];
+    const result = await runReportAgent({
+      companyName: state.companyName,
+      financialScore: state.financialScore,
+      newsScore: state.newsScore,
+      riskScore: state.riskScore,
+      recommendation: state.recommendation,
+      confidence: state.confidence,
+      strengths: state.strengths || [],
+      weaknesses: state.weaknesses || [],
+      positiveFactors: state.positiveFactors || [],
+      negativeFactors: state.negativeFactors || [],
+      risks: state.risks || []
+    });
 
-    const report = `# Investment Research Report: ${state.companyName} (${state.ticker})
-
-## Executive Summary
-* **Investment Action**: **${state.recommendation}**
-* **Overall Rating Score**: **${state.finalScore} / 100**
-* **Confidence Score**: **${(state.confidence * 100).toFixed(0)}%**
-
----
-
-## 1. Financial Health Analysis
-* **Score**: **${state.financialScore} / 100**
-* **Key Pricing & Financial Statistics**:
-  - Current Price: $${(metrics.currentPrice || 0).toLocaleString()}
-  - Market Capitalization: $${((metrics.marketCap || 0) / 1e9).toFixed(2)}B
-  - Trailing P/E Ratio: ${metrics.peRatio || 'N/A'}
-  - Revenue Growth (YoY): ${((metrics.revenueGrowth || 0) * 100).toFixed(2)}%
-  - Return on Equity (ROE): ${((metrics.roe || 0) * 100).toFixed(2)}%
-  - Debt-to-Equity: ${metrics.debtToEquity || 'N/A'}
-
-### 🟢 Strengths
-${strengths.map((s) => `* ${s}`).join('\n') || '* No core financial strengths identified.'}
-
-### 🔴 Weaknesses
-${weaknesses.map((w) => `* ${w}`).join('\n') || '* No critical financial weaknesses identified.'}
-
----
-
-## 2. Market Sentiment Analysis
-* **Score**: **${state.newsScore} / 100**
-* **Aggregated Sentiment Outlook**: **${state.sentiment}**
-* **Sentiment Heuristic Summary**:
-  _${state.newsSummary || 'No news summary compiled.'}_
-
-### Positive Market Drivers:
-${positiveFactors.map((f) => `* ${f}`).join('\n') || '* No positive factors noted.'}
-
-### Negative Market Pressures:
-${negativeFactors.map((f) => `* ${f}`).join('\n') || '* No negative factors noted.'}
-
----
-
-## 3. Risk & Mitigation Diagnostics
-* **Score**: **${state.riskScore} / 100**
-* **Aggregated Risk Level**: **${state.riskLevel}**
-
-### Identified Risk Dimensions:
-${risks.map((r) => `* ${r}`).join('\n') || '* No major risk dimensions flagged.'}
-
-### Compensating Mitigation Factors:
-${mitigationFactors.map((m) => `* ${m}`).join('\n') || '* No compensating factors listed.'}
-
----
-_Disclaimer: This report is dynamically formulated by a quantitative rules-based agent system and is intended for informational research purposes only._
-`;
-
-    return { report };
+    return {
+      report: result.report
+    };
   } catch (error) {
     console.error('[Graph Node Error] Report Node failed:', error.message);
     throw new AppError(`Report compilation step failed: ${error.message}`, 500);

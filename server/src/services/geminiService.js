@@ -3,6 +3,7 @@ import { env } from '../config/env.js';
 import { AppError } from '../utils/AppError.js';
 import { getNewsSentimentPrompt } from '../prompts/newsPrompt.js';
 import { getRiskAnalysisPrompt } from '../prompts/riskPrompt.js';
+import { getReportPrompt } from '../prompts/reportPrompt.js';
 
 // Initialize the Google GenAI SDK client if the API key is configured
 const ai = env.geminiApiKey && env.geminiApiKey !== 'your_gemini_api_key_here'
@@ -109,6 +110,30 @@ const generateMockRiskAnalysis = (companyName, financialScore, sentiment) => {
     ],
     summary: `Mock Risk Analysis: Assessed ${companyName} at a ${riskLevel} Risk level (${riskScore}/100) using quantitative inputs.`
   };
+};
+
+/**
+ * Heuristics-based mock investment report generator.
+ * Used as a fallback when the Gemini API key is missing or fails.
+ */
+const generateMockReport = (companyName, recommendation, finalScore, confidence) => {
+  return `# Investment Research Report: ${companyName}
+
+## Executive Summary
+We have conducted a quantitative equity research evaluation for ${companyName}. Based on our rules-based decision algorithm, we recommend a **${recommendation}** action. The stock registers an overall rating score of **${finalScore}/100** with an analytical confidence level of **${(confidence * 100).toFixed(0)}%**.
+
+## Financial Analysis
+The financial health parameters display steady characteristics. Cash flow metrics remain positive, indicating liquid operations and a solid buffer, while leverage parameters are within standard constraints.
+
+## News Analysis
+Market news sentiment indicators point to general public updates, presenting a balanced stance. Key product visibility is healthy.
+
+## Risk Analysis
+Operational and market risks remain moderate. Key dimensions include competitive peer pressures and regulatory policy controls, offset by robust liquidity mitigation buffers.
+
+## Final Recommendation
+Based on the aggregated sub-scores, the stock is rated **${recommendation}** as it trades at fair value parameters relative to its current operational yield.
+`;
 };
 
 /**
@@ -282,11 +307,90 @@ export const analyzeRisk = async ({
 };
 
 /**
- * Placeholder for compiling final research analyst reports.
+ * Compiles a comprehensive, professional investment research report.
+ * @param {Object} input - Input data fields
+ * @returns {Promise<Object>} Formatted report JSON containing "report" markdown string
  */
-export const generateReport = async (ticker, analysisData) => {
-  console.log(`[Gemini Service] Placeholder generateReport called for: "${ticker}"`);
-  return { success: true, message: 'Report generator module activated (Placeholder).' };
+export const generateReport = async ({
+  companyName,
+  financialScore,
+  newsScore,
+  riskScore,
+  recommendation,
+  confidence,
+  strengths,
+  weaknesses,
+  positiveFactors,
+  negativeFactors,
+  risks
+}) => {
+  if (!companyName) {
+    throw new AppError('companyName is required to compile report', 400);
+  }
+
+  const finalScore = Math.round(
+    ((financialScore || 50) * 0.5) +
+    ((newsScore || 50) * 0.25) +
+    ((riskScore || 50) * 0.25)
+  );
+
+  // Fallback if Gemini key is missing or unconfigured
+  if (!ai) {
+    console.log(`[Gemini Service] API key unconfigured. Utilizing mock report template for "${companyName}"...`);
+    const mockReport = generateMockReport(companyName, recommendation || 'HOLD', finalScore, confidence || 0.8);
+    return { report: mockReport };
+  }
+
+  const prompt = getReportPrompt({
+    companyName,
+    financialScore,
+    newsScore,
+    riskScore,
+    recommendation,
+    confidence,
+    strengths,
+    weaknesses,
+    positiveFactors,
+    negativeFactors,
+    risks
+  });
+
+  try {
+    const responseSchema = {
+      type: 'OBJECT',
+      properties: {
+        report: {
+          type: 'STRING'
+        }
+      },
+      required: ['report']
+    };
+
+    console.log(`[Gemini Service] Dispatching report compilation request for "${companyName}" using ${env.geminiModel}...`);
+
+    const result = await callWithRetry(() =>
+      ai.models.generateContent({
+        model: env.geminiModel,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          responseSchema: responseSchema
+        }
+      })
+    );
+
+    const responseText = result.text;
+    if (!responseText) {
+      throw new Error('Received an empty text block from Google GenAI during report generation.');
+    }
+
+    return JSON.parse(responseText);
+
+  } catch (error) {
+    console.error(`[Gemini Service Error] Report API request crashed: ${error.message}. Falling back to mock report template...`);
+    const mockReport = generateMockReport(companyName, recommendation || 'HOLD', finalScore, confidence || 0.8);
+    return { report: mockReport };
+  }
 };
 
 export default {
