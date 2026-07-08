@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnalysis } from '../hooks/useAnalysis.js';
+import { useToast } from '../components/Toast.jsx';
+import { ScoreCardSkeleton } from '../components/Skeleton.jsx';
 import { ArrowLeft, RefreshCw, BarChart2, ShieldAlert, Award, FileText, ArrowUpRight, Search, Trash2 } from 'lucide-react';
 
 /**
@@ -10,6 +12,7 @@ import { ArrowLeft, RefreshCw, BarChart2, ShieldAlert, Award, FileText, ArrowUpR
 export const History = () => {
   const navigate = useNavigate();
   const { history, fetchHistory, deleteAnalysisItem, loading, error } = useAnalysis();
+  const { addToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -39,8 +42,9 @@ export const History = () => {
     if (window.confirm(`Are you sure you want to delete the research report for ${companyName}?`)) {
       try {
         await deleteAnalysisItem(id);
+        addToast(`Successfully deleted analysis record for ${companyName}.`, 'success');
       } catch (err) {
-        alert(err.message || 'Operational failure: Deletion aborted.');
+        addToast(err.message || 'Operational failure: Deletion aborted.', 'error');
       }
     }
   };
@@ -115,9 +119,13 @@ export const History = () => {
       {/* Main Body */}
       <main className="mx-auto max-w-7xl px-4 py-2 sm:px-6 lg:px-8">
         {loading && history.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <RefreshCw className="h-8 w-8 text-emerald-500 animate-spin mb-4" />
-            <span className="text-sm font-semibold text-slate-400">Loading historical database records...</span>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ScoreCardSkeleton />
+            <ScoreCardSkeleton />
+            <ScoreCardSkeleton />
+            <ScoreCardSkeleton />
+            <ScoreCardSkeleton />
+            <ScoreCardSkeleton />
           </div>
         ) : error ? (
           <div className="p-4 rounded-xl border border-red-200/50 bg-red-50 text-red-600 text-sm font-semibold max-w-md mx-auto text-center dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">

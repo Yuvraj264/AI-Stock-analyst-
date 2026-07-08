@@ -5,6 +5,7 @@ import Home from './pages/Home.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import History from './pages/History.jsx';
 import Compare from './pages/Compare.jsx';
+import { ToastProvider } from './components/Toast.jsx';
 
 /**
  * Main Application orchestrator.
@@ -12,17 +13,19 @@ import Compare from './pages/Compare.jsx';
  */
 function App() {
   return (
-    <Router>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/history" element={<History />} />
-          <Route path="/compare" element={<Compare />} />
-        </Routes>
-      </div>
-    </Router>
+    <ToastProvider>
+      <Router>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/history" element={<History />} />
+            <Route path="/compare" element={<Compare />} />
+          </Routes>
+        </div>
+      </Router>
+    </ToastProvider>
   );
 }
 

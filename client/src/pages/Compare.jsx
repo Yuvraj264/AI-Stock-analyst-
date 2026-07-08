@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAnalysis } from '../hooks/useAnalysis.js';
 import { ComparisonTable } from '../components/ComparisonTable.jsx';
 import { ComparisonSummary } from '../components/ComparisonSummary.jsx';
+import { SkeletonBase, CardSkeleton, ReportSkeleton } from '../components/Skeleton.jsx';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, RefreshCw, Layers, Sparkles, HelpCircle } from 'lucide-react';
 
@@ -183,11 +184,27 @@ export const Compare = () => {
           </div>
         )}
 
-        {/* Loading Spinner */}
+        {/* Loading Skeletons */}
         {isLoading && (
-          <div className="flex flex-col items-center justify-center py-12">
-            <RefreshCw className="h-8 w-8 text-emerald-500 animate-spin mb-4" />
-            <span className="text-sm font-semibold text-slate-400">Running multi-agent analysis on both companies concurrently...</span>
+          <div className="space-y-8 animate-fadeIn">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md space-y-4">
+                  <SkeletonBase className="h-6 w-48 mb-6" />
+                  <div className="space-y-3">
+                    <SkeletonBase className="h-8 w-full" />
+                    <SkeletonBase className="h-8 w-full" />
+                    <SkeletonBase className="h-8 w-full" />
+                    <SkeletonBase className="h-8 w-full" />
+                    <SkeletonBase className="h-8 w-full" />
+                  </div>
+                </div>
+              </div>
+              <div className="lg:col-span-1">
+                <ReportSkeleton />
+              </div>
+            </div>
+            <CardSkeleton />
           </div>
         )}
 

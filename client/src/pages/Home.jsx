@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar.jsx';
 import { LoadingSpinner } from '../components/LoadingSpinner.jsx';
 import { useAnalysis } from '../hooks/useAnalysis.js';
+import { useToast } from '../components/Toast.jsx';
 import { Shield, Cpu, BarChart3, ArrowRight } from 'lucide-react';
 
 /**
@@ -12,16 +13,20 @@ import { Shield, Cpu, BarChart3, ArrowRight } from 'lucide-react';
 export const Home = () => {
   const navigate = useNavigate();
   const { analyzeStock, loading, error } = useAnalysis();
+  const { addToast } = useToast();
   const [searchedName, setSearchedName] = useState('');
 
   const handleSearchSubmit = async (companyName) => {
     setSearchedName(companyName);
+    addToast(`Launching multi-agent research workflow for "${companyName}"...`, 'info');
     try {
       const data = await analyzeStock(companyName);
+      addToast(`Analysis successfully compiled for ${data.companyName}!`, 'success');
       // Navigate to analytical dashboard passing the result payload in location state
       navigate('/dashboard', { state: { analysis: data } });
     } catch (err) {
       console.error('Home page research trigger crashed:', err);
+      addToast(err.message || 'Workflow execution error.', 'error');
     }
   };
 
