@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { SearchBar } from '../components/SearchBar.jsx';
 import { LoadingSpinner } from '../components/LoadingSpinner.jsx';
-import { useAnalysis } from '../hooks/useAnalysis.js';
+import { performAnalysis } from '../services/api.js';
 import { useToast } from '../components/Toast.jsx';
 import { Shield, Cpu, BarChart3, ArrowRight } from 'lucide-react';
 
@@ -12,28 +12,54 @@ import { Shield, Cpu, BarChart3, ArrowRight } from 'lucide-react';
  */
 export const Home = () => {
   const navigate = useNavigate();
-  const { analyzeStock, loading, error } = useAnalysis();
   const { addToast } = useToast();
+  
   const [searchedName, setSearchedName] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchResult, setSearchResult] = useState(null);
+  const [searchError, setSearchError] = useState(null);
 
   const handleSearchSubmit = async (companyName) => {
     setSearchedName(companyName);
+    setIsSearching(true);
+    setSearchResult(null);
+    setSearchError(null);
+    
     addToast(`Launching multi-agent research workflow for "${companyName}"...`, 'info');
+    
     try {
-      const data = await analyzeStock(companyName);
-      addToast(`Analysis successfully compiled for ${data.companyName}!`, 'success');
-      // Navigate to analytical dashboard passing the result payload in location state
-      navigate('/dashboard', { state: { analysis: data } });
+      const response = await performAnalysis(companyName);
+      if (response && response.success) {
+        setSearchResult(response.data);
+      } else {
+        throw new Error(response.message || 'Stock analysis execution failed.');
+      }
     } catch (err) {
       console.error('Home page research trigger crashed:', err);
-      addToast(err.message || 'Workflow execution error.', 'error');
+      const errMsg = err.response?.data?.message || err.message || 'Workflow execution error.';
+      setSearchError(errMsg);
+      setIsSearching(false);
+      addToast(errMsg, 'error');
     }
   };
 
-  if (loading) {
+  const handleLoaderFinished = () => {
+    if (searchResult) {
+      addToast(`Analysis successfully compiled for ${searchResult.companyName}!`, 'success');
+      setIsSearching(false);
+      // Navigate to analytical dashboard passing the result payload in location state
+      navigate('/dashboard', { state: { analysis: searchResult } });
+    }
+  };
+
+  if (isSearching) {
     return (
       <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 transition-colors duration-300">
-        <LoadingSpinner companyName={searchedName} />
+        <LoadingSpinner 
+          companyName={searchedName} 
+          isApiFinished={!!searchResult}
+          onFinished={handleLoaderFinished}
+        />
       </div>
     );
   }
@@ -62,12 +88,12 @@ export const Home = () => {
 
         {/* Centralized Search bar */}
         <div className="mt-10">
-          <SearchBar onSearch={handleSearchSubmit} loading={loading} />
+          <SearchBar onSearch={handleSearchSubmit} loading={isSearching} />
         </div>
 
-        {error && (
+        {searchError && (
           <div className="mt-6 max-w-md mx-auto p-4 rounded-xl border border-red-200/50 bg-red-50 text-red-600 text-sm font-semibold dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
-            {error}
+            {searchError}
           </div>
         )}
       </section>

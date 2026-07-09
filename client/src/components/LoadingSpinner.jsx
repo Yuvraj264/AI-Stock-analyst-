@@ -4,8 +4,9 @@ import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 /**
  * Premium step-by-step loading screen.
  * Simulates active research agent states to keep the UI engaging.
+ * Accelerates ticks when isApiFinished is true and calls onFinished at completion.
  */
-export const LoadingSpinner = ({ companyName = 'Stock' }) => {
+export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, onFinished }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [
@@ -19,16 +20,33 @@ export const LoadingSpinner = ({ companyName = 'Stock' }) => {
   ];
 
   useEffect(() => {
-    // Increment the simulated loading step indicator periodically
+    // If API finishes, we run remaining steps rapidly (every 250ms).
+    // Otherwise, we tick normally at 2.5s per step.
+    const intervalDuration = isApiFinished ? 250 : 2500;
+
     const interval = setInterval(() => {
       setActiveStep((prev) => {
-        if (prev < steps.length - 1) return prev + 1;
-        return prev;
+        if (prev < steps.length - 1) {
+          return prev + 1;
+        } else {
+          clearInterval(interval);
+          return prev;
+        }
       });
-    }, 2800);
+    }, intervalDuration);
 
     return () => clearInterval(interval);
-  }, [steps.length]);
+  }, [isApiFinished, steps.length]);
+
+  // When activeStep hits the final index and API is completed, wait 500ms and call onFinished
+  useEffect(() => {
+    if (activeStep === steps.length - 1 && isApiFinished && onFinished) {
+      const delay = setTimeout(() => {
+        onFinished();
+      }, 500);
+      return () => clearTimeout(delay);
+    }
+  }, [activeStep, isApiFinished, onFinished, steps.length]);
 
   return (
     <div className="flex flex-col items-center justify-center p-12 max-w-lg mx-auto bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-xl transition-all duration-300">
