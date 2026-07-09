@@ -33,6 +33,7 @@ export const AnalysisState = Annotation.Root({
   financialScore: overrideField(),
   newsScore: overrideField(),
   riskScore: overrideField(),
+  breakdown: overrideField(),
 
   // Qualitative Classifications
   sentiment: overrideField(),

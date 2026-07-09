@@ -30,10 +30,14 @@ export const runAnalysis = async (req, res, next) => {
 
     console.log(`[Analysis Controller] Successfully saved analysis (ID: ${savedAnalysis._id}) for "${savedAnalysis.companyName}" (${savedAnalysis.ticker})`);
 
-    // Return final saved analysis document
+    // Return final saved analysis document merged with live transient data
     res.status(201).json({
       success: true,
-      data: savedAnalysis
+      data: {
+        ...savedAnalysis.toObject(),
+        financialData: finalState.financialData,
+        breakdown: finalState.breakdown
+      }
     });
 
   } catch (error) {

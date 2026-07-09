@@ -42,6 +42,7 @@ const financialNode = async (state) => {
     
     return {
       financialScore: result.financialScore,
+      breakdown: result.breakdown,
       strengths: result.strengths,
       weaknesses: result.weaknesses
     };
