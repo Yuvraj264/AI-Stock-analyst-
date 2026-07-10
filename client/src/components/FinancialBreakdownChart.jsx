@@ -46,46 +46,47 @@ export const FinancialBreakdownChart = ({ score = 0, breakdown }) => {
   ];
 
   return (
-    <div className="p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md flex flex-col h-full transition-all duration-300 hover:shadow-lg">
-      <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wide mb-4">
-        Financial Sub-Score Breakdown (Max 20 per metric)
+    <div className="p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm hover:scale-[1.01] transition-all duration-150 flex flex-col h-full animate-fadeInUp">
+      <h3 className="text-[10px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider mb-4">
+        FINANCIAL BREAKDOWN GRID (MAX 20 / METRIC)
       </h3>
       <div className="h-64 w-full flex items-center justify-center">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-            <PolarGrid stroke="#e2e8f0" className="dark:stroke-slate-800" />
+            <PolarGrid stroke="#1F2937" />
             <PolarAngleAxis
               dataKey="subject"
-              tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+              tick={{ fill: '#94A3B8', fontSize: 9, fontFamily: 'Plus Jakarta Sans' }}
             />
             <PolarRadiusAxis
               angle={30}
               domain={[0, 20]}
-              tick={{ fill: '#64748b', fontSize: 9 }}
+              tick={{ fill: '#94A3B8', fontSize: 8, fontFamily: 'Plus Jakarta Sans' }}
               axisLine={false}
             />
             <Radar
               name="Score"
               dataKey="value"
-              stroke="#6366f1"
-              fill="#6366f1"
-              fillOpacity={0.25}
+              stroke="#10B981"
+              fill="#10B981"
+              fillOpacity={0.15}
             />
             <Tooltip
               contentStyle={{
-                backgroundColor: '#0f172a',
-                border: 'none',
-                borderRadius: '0.75rem',
-                color: '#f8fafc',
-                fontSize: '0.875rem'
+                backgroundColor: '#111827',
+                border: '1px solid #1F2937',
+                borderRadius: '6px',
+                color: '#F8FAFC',
+                fontFamily: 'Plus Jakarta Sans',
+                fontSize: '0.75rem'
               }}
             />
           </RadarChart>
         </ResponsiveContainer>
       </div>
-      <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-850 text-center">
-        <span className="text-xs text-slate-400 font-medium">
-          Total Financial Score: <span className="text-indigo-500 font-bold">{finalFinancialScore} / 100</span>
+      <div className="mt-4 pt-4 border-t border-[#1F2937] text-center">
+        <span className="text-[10px] font-sans text-[#94A3B8]">
+          AGGREGATED FINANCE SCORE: <span className="text-[#10B981] font-bold">{finalFinancialScore} / 100</span>
         </span>
       </div>
     </div>

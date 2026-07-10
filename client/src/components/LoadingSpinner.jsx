@@ -3,8 +3,7 @@ import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 /**
  * Premium step-by-step loading screen.
- * Simulates active research agent states to keep the UI engaging.
- * Accelerates ticks when isApiFinished is true and calls onFinished at completion.
+ * Configured with Slate + Emerald style presets: rounded-lg card, emerald active spinner.
  */
 export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, onFinished }) => {
   const [activeStep, setActiveStep] = useState(0);
@@ -20,9 +19,8 @@ export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, o
   ];
 
   useEffect(() => {
-    // If API finishes, we run remaining steps rapidly (every 250ms).
-    // Otherwise, we tick normally at 2.5s per step.
-    const intervalDuration = isApiFinished ? 250 : 2500;
+    // If API finishes, we run remaining steps rapidly (every 200ms) for high-performance terminal feel.
+    const intervalDuration = isApiFinished ? 200 : 2000;
 
     const interval = setInterval(() => {
       setActiveStep((prev) => {
@@ -38,34 +36,32 @@ export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, o
     return () => clearInterval(interval);
   }, [isApiFinished, steps.length]);
 
-  // When activeStep hits the final index and API is completed, wait 500ms and call onFinished
   useEffect(() => {
     if (activeStep === steps.length - 1 && isApiFinished && onFinished) {
       const delay = setTimeout(() => {
         onFinished();
-      }, 500);
+      }, 400);
       return () => clearTimeout(delay);
     }
   }, [activeStep, isApiFinished, onFinished, steps.length]);
 
   return (
-    <div className="flex flex-col items-center justify-center p-12 max-w-lg mx-auto bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-3xl shadow-xl transition-all duration-300">
+    <div className="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-[#111827] border border-[#1F2937] rounded-lg shadow-md animate-fadeInUp">
       
-      {/* Spinning Ring */}
-      <div className="relative flex items-center justify-center h-20 w-20">
-        <div className="absolute inset-0 rounded-full border-4 border-emerald-500/10 dark:border-emerald-500/5"></div>
-        <Loader2 className="h-10 w-10 text-emerald-500 animate-spin" />
+      {/* Pulse status indicator */}
+      <div className="relative flex items-center justify-center h-14 w-14 mb-4">
+        <Loader2 className="h-8 w-8 text-[#10B981] animate-spin" />
       </div>
 
-      <h3 className="mt-6 text-xl font-bold text-slate-800 dark:text-white text-center">
+      <h3 className="text-sm font-sans font-bold text-[#F8FAFC] uppercase tracking-wider text-center">
         Analyzing {companyName}
       </h3>
-      <p className="mt-1 text-sm text-slate-400 text-center">
-        Our multi-agent consensus graph is compiling metrics...
+      <p className="mt-1 text-[10px] font-mono text-[#94A3B8] uppercase tracking-wide text-center">
+        EXEC_GRAPH_CONSENSUS: PROCESSING DATASTREAM
       </p>
 
-      {/* Steps List */}
-      <div className="w-full mt-8 space-y-4">
+      {/* Ticking checks */}
+      <div className="w-full mt-6 space-y-3 pt-4 border-t border-[#1F2937]">
         {steps.map((text, idx) => {
           const isCompleted = idx < activeStep;
           const isActive = idx === activeStep;
@@ -73,31 +69,37 @@ export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, o
           return (
             <div
               key={idx}
-              className={`flex items-start gap-3 transition-opacity duration-300 ${
+              className={`flex items-start gap-2.5 transition-opacity duration-150 ${
                 isCompleted || isActive ? 'opacity-100' : 'opacity-30'
               }`}
             >
               {isCompleted ? (
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 text-[#10B981] shrink-0 mt-0.5" />
               ) : isActive ? (
-                <Loader2 className="h-5 w-5 text-emerald-500 shrink-0 animate-spin mt-0.5" />
+                <Loader2 className="h-4 w-4 text-[#10B981] shrink-0 animate-spin mt-0.5" />
               ) : (
-                <Circle className="h-5 w-5 text-slate-300 dark:text-slate-700 shrink-0 mt-0.5" />
+                <Circle className="h-4 w-4 text-[#1F2937] shrink-0 mt-0.5" />
               )}
               <span
-                className={`text-xs font-semibold leading-relaxed ${
+                className={`text-[10px] font-mono tracking-wide leading-relaxed uppercase ${
                   isActive
-                    ? 'text-slate-800 dark:text-white font-bold'
+                    ? 'text-[#10B981] font-bold'
                     : isCompleted
-                    ? 'text-slate-500 dark:text-slate-400'
-                    : 'text-slate-400 dark:text-slate-600'
+                    ? 'text-[#94A3B8]'
+                    : 'text-[#64748B]'
                 }`}
               >
-                {text}
+                [{idx + 1}] {text}
               </span>
             </div>
           );
         })}
+      </div>
+
+      {/* Terminal Footer Info */}
+      <div className="w-full mt-6 pt-3 border-t border-[#1F2937] flex items-center justify-between text-[8px] font-mono text-[#64748B] tracking-wider uppercase">
+        <span>STATUS: WORKING</span>
+        <span>SYS_LOG: OK</span>
       </div>
 
     </div>

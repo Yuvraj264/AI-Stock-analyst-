@@ -2,103 +2,96 @@ import React from 'react';
 import { DollarSign, Newspaper, ShieldAlert, Award, HelpCircle } from 'lucide-react';
 
 /**
- * Score visualization card with radial/circular gauge ring.
- * Maps score thresholds to customized HSL color-coded states.
+ * Score Card Component.
+ * Styled as a modular rounded-lg panel inside the Slate + Emerald design theme.
  */
 export const ScoreCard = ({ title, score, maxScore = 100, type = 'financial' }) => {
   const parsedScore = Number(score);
   const normalizedScore = isNaN(parsedScore) ? 0 : parsedScore;
   
-  // Custom theme mapping based on agent type
+  // Terminal mapping for subscores
   const themeMap = {
     financial: {
       icon: DollarSign,
-      glow: 'shadow-blue-500/10 dark:shadow-blue-500/5',
       ringColor: 'stroke-blue-500',
-      trackColor: 'stroke-blue-100 dark:stroke-blue-950/40',
-      bgGrad: 'from-blue-50/50 to-white dark:from-blue-950/10 dark:to-slate-900',
-      labelColor: 'text-blue-500'
+      trackColor: 'stroke-[#1F2937]',
+      textColor: 'text-blue-400',
+      bgColor: 'bg-blue-500/10'
     },
     news: {
       icon: Newspaper,
-      glow: 'shadow-indigo-500/10 dark:shadow-indigo-500/5',
       ringColor: 'stroke-indigo-500',
-      trackColor: 'stroke-indigo-100 dark:stroke-indigo-950/40',
-      bgGrad: 'from-indigo-50/50 to-white dark:from-indigo-950/10 dark:to-slate-900',
-      labelColor: 'text-indigo-500'
+      trackColor: 'stroke-[#1F2937]',
+      textColor: 'text-indigo-400',
+      bgColor: 'bg-indigo-500/10'
     },
     risk: {
       icon: ShieldAlert,
-      glow: 'shadow-amber-500/10 dark:shadow-amber-500/5',
-      ringColor: 'stroke-amber-500',
-      trackColor: 'stroke-amber-100 dark:stroke-amber-950/40',
-      bgGrad: 'from-amber-50/50 to-white dark:from-amber-950/10 dark:to-slate-900',
-      labelColor: 'text-amber-500'
+      ringColor: 'stroke-[#F59E0B]',
+      trackColor: 'stroke-[#1F2937]',
+      textColor: 'text-[#F59E0B]',
+      bgColor: 'bg-[#F59E0B]/10'
     },
     final: {
       icon: Award,
-      glow: 'shadow-emerald-500/10 dark:shadow-emerald-500/5',
-      ringColor: 'stroke-emerald-500',
-      trackColor: 'stroke-emerald-100 dark:stroke-emerald-950/40',
-      bgGrad: 'from-emerald-50/50 to-white dark:from-emerald-950/10 dark:to-slate-900',
-      labelColor: 'text-emerald-500'
+      ringColor: 'stroke-[#10B981]',
+      trackColor: 'stroke-[#1F2937]',
+      textColor: 'text-[#10B981]',
+      bgColor: 'bg-[#10B981]/10'
     }
   };
 
   const currentTheme = themeMap[type] || themeMap.financial;
   const IconComponent = currentTheme.icon || HelpCircle;
 
-  // SVG Gauge calculations
+  // SVG circular path metrics (no rounded lines)
   const radius = 34;
   const circumference = 2 * Math.PI * radius;
   const percentage = Math.min(Math.max((normalizedScore / maxScore) * 100, 0), 100);
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
   return (
-    <div className={`relative flex items-center justify-between p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-gradient-to-br ${currentTheme.bgGrad} shadow-lg ${currentTheme.glow} transition-all duration-300 hover:-translate-y-1`}>
+    <div className="relative flex items-center justify-between p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm hover:scale-[1.01] hover:border-[#1F2937]/80 transition-all duration-150 animate-fadeInUp">
       
-      {/* Visual Meta Data */}
+      {/* High-Contrast Info Column */}
       <div className="flex gap-4 items-center">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-xl bg-white dark:bg-slate-950 border border-slate-200/50 dark:border-slate-800/80 shadow-sm ${currentTheme.labelColor}`}>
-          <IconComponent className="h-6 w-6" />
+        <div className={`flex h-10 w-10 items-center justify-center rounded-md border border-[#1F2937] ${currentTheme.bgColor} ${currentTheme.textColor}`}>
+          <IconComponent className="h-5 w-5" />
         </div>
         <div>
-          <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">
+          <span className="text-[10px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">
             {title}
           </span>
-          <span className="text-3xl font-extrabold text-slate-900 dark:text-white mt-1 block">
+          <span className="text-2xl font-mono font-bold text-[#F8FAFC] tracking-tight tabular-nums mt-0.5 block">
             {normalizedScore}
-            <span className="text-slate-400 dark:text-slate-600 text-sm font-semibold ml-0.5">
+            <span className="text-[#64748B] text-xs font-normal ml-0.5 font-sans">
               /{maxScore}
             </span>
           </span>
         </div>
       </div>
 
-      {/* SVG Radial Gauge */}
-      <div className="relative h-20 w-20 flex items-center justify-center">
+      {/* Strict Circular Dial */}
+      <div className="relative h-16 w-16 flex items-center justify-center shrink-0">
         <svg className="h-full w-full -rotate-90" viewBox="0 0 80 80">
-          {/* Base Track */}
           <circle
             cx="40"
             cy="40"
             r={radius}
             className={`fill-none ${currentTheme.trackColor}`}
-            strokeWidth="6"
+            strokeWidth="5"
           />
-          {/* Active Ring */}
           <circle
             cx="40"
             cy="40"
             r={radius}
-            className={`fill-none transition-all duration-1000 ease-out ${currentTheme.ringColor}`}
-            strokeWidth="6"
+            className={`fill-none transition-all duration-700 ease-out ${currentTheme.ringColor}`}
+            strokeWidth="5"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
           />
         </svg>
-        <span className="absolute text-xs font-extrabold text-slate-700 dark:text-slate-300">
+        <span className="absolute text-[10px] font-mono font-bold text-[#F8FAFC] tabular-nums">
           {Math.round(percentage)}%
         </span>
       </div>

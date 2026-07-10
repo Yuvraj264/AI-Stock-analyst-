@@ -24,12 +24,12 @@ export const ExportPdfButton = ({ elementId, fileName = 'research-report' }) => 
     try {
       console.log(`[PDF Export] Capturing element "${elementId}" using html2canvas...`);
       
-      // Temporarily add a printing class or styles to ensure clean layouts
+      // Captured canvas forced to terminal theme background color #0A0E17
       const canvas = await html2canvas(element, {
-        scale: 2, // 2x resolution for printing sharpness
+        scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: document.documentElement.classList.contains('dark') ? '#0f172a' : '#f8fafc' // Sync with theme bg
+        backgroundColor: '#0A0E17'
       });
 
       console.log(`[PDF Export] Compiling jsPDF multi-page document...`);
@@ -38,7 +38,7 @@ export const ExportPdfButton = ({ elementId, fileName = 'research-report' }) => 
       // jsPDF setup (A4 standard: 210mm x 297mm)
       const pdf = new jsPDF('p', 'mm', 'a4');
       const imgWidth = 210;
-      const pageHeight = 295; // Slightly less than 297 to leave margins
+      const pageHeight = 295;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
@@ -70,17 +70,17 @@ export const ExportPdfButton = ({ elementId, fileName = 'research-report' }) => 
       type="button"
       onClick={handleExport}
       disabled={exporting}
-      className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-950 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-850 dark:hover:text-white transition-colors duration-200 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed shadow-sm"
+      className="flex items-center gap-1.5 px-3 py-1.5 rounded-none border border-[#1F2937] bg-[#111827] text-[10px] font-mono font-bold uppercase tracking-wider text-[#9CA3AF] hover:text-[#00D4AA] hover:border-[#00D4AA] hover:bg-[#0A0E17] transition-all duration-150 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       title="Export analysis to PDF report"
     >
       {exporting ? (
         <>
-          <RefreshCw className="h-4 w-4 animate-spin text-emerald-500" />
+          <RefreshCw className="h-3.5 w-3.5 animate-spin text-[#00D4AA]" />
           <span>Generating PDF...</span>
         </>
       ) : (
         <>
-          <Download className="h-4 w-4 text-emerald-500" />
+          <Download className="h-3.5 w-3.5 text-[#00D4AA]" />
           <span>Export PDF</span>
         </>
       )}

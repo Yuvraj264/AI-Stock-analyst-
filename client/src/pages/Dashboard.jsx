@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { ScoreCard } from '../components/ScoreCard.jsx';
 import { RecommendationCard } from '../components/RecommendationCard.jsx';
@@ -9,50 +9,52 @@ import { ReportCard } from '../components/ReportCard.jsx';
 import { FinancialBreakdownChart } from '../components/FinancialBreakdownChart.jsx';
 import { ScoreComparisonChart } from '../components/ScoreComparisonChart.jsx';
 import { ExportPdfButton } from '../components/ExportPdfButton.jsx';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { FileText, ArrowLeft, ArrowUpRight, ArrowDownRight, RefreshCw, BarChart2, Shield, Eye, Info } from 'lucide-react';
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+import { FileText, ArrowLeft, RefreshCw, BarChart2, Info } from 'lucide-react';
+
+// Static mockup metrics block to prevent blank page load if routing state is empty
+const sampleData = {
+  companyName: 'NVIDIA Corporation',
+  ticker: 'NVDA',
+  financialScore: 70,
+  newsScore: 75,
+  riskScore: 85,
+  finalScore: 75,
+  recommendation: 'HOLD',
+  confidence: 0.75,
+  report: '### QUANTITATIVE METRICS SUMMARY\nNVIDIA displays solid quantitative strength driven by outstanding revenue growth exceeding 20% YoY. Operating cash flows remain highly positive, supporting strategic moat investments. PE valuations remain stretched above historical multiples, creating valuation headwinds.',
+  risks: [
+    'Competitive processor scaling pressure from custom TPU/ASIC chips.',
+    'Overvaluation premiums relative to sector earnings averages.',
+    'Slowing quarter-on-quarter demand growth.'
+  ],
+  mitigationFactors: [
+    'Market share dominance in foundational GPU compute modules.',
+    'Strong balance sheet cache with minimal long-term leverage.',
+    'Expanding software ecosystem dependencies.'
+  ],
+  financialData: {
+    metrics: {
+      peRatio: 64.8,
+      revenueGrowth: 0.22,
+      roe: 0.28,
+      debtToEquity: 0.18,
+      freeCashFlow: 8200000000
+    },
+    historical: [
+      { date: '2026-06-01', close: 140 },
+      { date: '2026-06-15', close: 145 },
+      { date: '2026-07-01', close: 150 }
+    ]
+  }
+};
 
 /**
- * Interactive Analytical Dashboard.
- * Integrates charting widgets, list panels, and markdown investment reports.
+ * Analytical Dashboard.
+ * Formatted as a multi-pane equity research terminal workspace in Slate + Emerald theme.
  */
 export const Dashboard = () => {
   const location = useLocation();
-  const [activeTab, setActiveTab] = useState('financial');
-
-  // Fallback structure in case dashboard loaded directly without search parameters
-  const sampleData = {
-    companyName: 'Example Inc.',
-    ticker: 'EXMPL',
-    financialScore: 70,
-    newsScore: 60,
-    riskScore: 65,
-    finalScore: 66,
-    recommendation: 'HOLD',
-    confidence: 0.8,
-    strengths: ['Stable cash reserve metrics', 'Low capital leverage ratios'],
-    weaknesses: ['Negative growth ratios', 'High multiple premiums'],
-    positiveFactors: ['New tech initiatives announced'],
-    negativeFactors: ['Supply chain saturation warnings'],
-    risks: ['Pricing pressures from competitors'],
-    mitigationFactors: ['Low debt-to-equity cushions'],
-    report: '# Example Research Report\nUse the search bar on the home screen to fetch real-time reports.',
-    financialData: {
-      metrics: {
-        currentPrice: 150.0,
-        marketCap: 450000000,
-        peRatio: 22.5,
-        revenueGrowth: -0.05,
-        roe: 0.12,
-        debtToEquity: 0.35
-      },
-      historical: [
-        { date: '2026-06-01', close: 140 },
-        { date: '2026-06-15', close: 145 },
-        { date: '2026-07-01', close: 150 }
-      ]
-    }
-  };
 
   // Extract from react-router navigation location state
   const stateData = location.state?.analysis;
@@ -64,34 +66,35 @@ export const Dashboard = () => {
   const isHistoryRecord = !analysis.financialData;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white pb-12 transition-colors duration-300">
+    <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC] pb-12 transition-colors duration-200 font-sans">
       
-      <div id="pdf-export-area" className="px-4 py-8 sm:px-6 lg:px-8 bg-slate-50 dark:bg-slate-950">
+      <div id="pdf-export-area" className="px-4 py-6 sm:px-6 lg:px-8 bg-[#0F172A]">
         <div className="mx-auto max-w-7xl">
           
           {/* Header Panel */}
-          <div className="border-b border-slate-200/50 dark:border-slate-800/50 pb-8">
+          <div className="border-b border-[#1F2937] pb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Link
                   to="/"
                   data-html2canvas-ignore="true"
-                  className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-900 dark:hover:text-white transition-colors duration-200"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-[#1F2937] bg-[#111827] text-[#94A3B8] hover:text-[#10B981] hover:border-[#10B981] transition-all duration-150"
+                  aria-label="Return to console"
                 >
-                  <ArrowLeft className="h-5 w-5" />
+                  <ArrowLeft className="h-4 w-4" />
                 </Link>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h1 className="text-3xl font-extrabold tracking-tight">{analysis.companyName}</h1>
+                    <h1 className="text-xl font-sans font-bold tracking-tight uppercase text-[#F8FAFC] tracking-[-0.01em]">{analysis.companyName}</h1>
                     {isHistoryRecord && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-900 text-slate-500 border border-slate-250 dark:border-slate-800">
-                        <Info className="h-3.5 w-3.5 text-blue-500" />
-                        Archived Report
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-mono font-bold bg-[#111827] text-[#94A3B8] border border-[#1F2937] shadow-sm">
+                        <Info className="h-3 w-3 text-blue-400" />
+                        ARCHIVE_RECORD
                       </span>
                     )}
                   </div>
-                  <p className="text-sm font-semibold text-slate-400 mt-0.5">
-                    Ticker Resolved: <span className="text-emerald-500 font-bold">{analysis.ticker}</span>
+                  <p className="text-[10px] font-mono text-[#94A3B8] uppercase mt-0.5">
+                    Ticker Resolved: <span className="text-[#10B981] font-bold">{analysis.ticker}</span>
                   </p>
                 </div>
               </div>
@@ -99,9 +102,9 @@ export const Dashboard = () => {
                 <ExportPdfButton elementId="pdf-export-area" fileName={`${analysis.ticker}-Analysis-Report`} />
                 <Link
                   to="/"
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-500 text-white hover:bg-emerald-600 shadow-md shadow-emerald-500/10 transition-colors duration-200"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#10B981] text-[#0F172A] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#34D399] hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 shadow-sm shadow-emerald-950/10"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-3.5 w-3.5" />
                   New Analysis
                 </Link>
               </div>
@@ -109,167 +112,168 @@ export const Dashboard = () => {
           </div>
 
           {/* Main Layout Container */}
-          <main className="space-y-8 mt-8">
-        
-        {/* Row 1: Sub-Score Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <ScoreCard title="Consensus Score" score={analysis.finalScore} type="final" />
-          <ScoreCard title="Financial Score" score={analysis.financialScore} type="financial" />
-          <ScoreCard title="Sentiment Score" score={analysis.newsScore} type="news" />
-          <ScoreCard title="Risk Safety Score" score={analysis.riskScore} type="risk" />
-        </div>
-
-        {/* Row 2: Chart & Recommendation Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column: Recharts Price Trend AreaChart */}
-          <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md flex flex-col justify-between">
-            <div>
-              <h3 className="text-base font-bold text-slate-400 uppercase tracking-wide mb-4">
-                30-Day Historical Close Price ($)
-              </h3>
-            </div>
-            <div className="h-80 w-full flex items-center justify-center">
-              {historicalData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={historicalData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorClose" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis
-                      dataKey="date"
-                      tickLine={false}
-                      axisLine={false}
-                      tick={{ fontSize: 10, fill: '#64748b' }}
-                      dy={10}
-                    />
-                    <YAxis
-                      domain={['auto', 'auto']}
-                      tickLine={false}
-                      axisLine={false}
-                      tick={{ fontSize: 10, fill: '#64748b' }}
-                      dx={-10}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: '#0f172a',
-                        border: 'none',
-                        borderRadius: '0.75rem',
-                        color: '#f8fafc',
-                        fontSize: '0.875rem'
-                      }}
-                      labelClassName="font-semibold text-slate-400"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="close"
-                      stroke="#10b981"
-                      strokeWidth={2.5}
-                      fillOpacity={1}
-                      fill="url(#colorClose)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="text-center p-6 space-y-2">
-                  <BarChart2 className="h-10 w-10 text-slate-350 dark:text-slate-700 mx-auto" />
-                  <p className="text-sm text-slate-400 font-semibold">
-                    Historical metrics unavailable
-                  </p>
-                  <p className="text-xs text-slate-400/80 max-w-md">
-                    Live interactive charts are available on new analysis runs. Database archives only preserve executive synthesis and scoring metrics.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Column: Recommendation summary */}
-          <div>
-            <RecommendationCard
-              recommendation={analysis.recommendation}
-              confidence={analysis.confidence}
-              score={analysis.finalScore}
-            />
-          </div>
-
-        </div>
-
-        {/* Row 3: Analytical Charts Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <FinancialBreakdownChart
-            score={analysis.financialScore}
-            breakdown={analysis.breakdown}
-          />
-          <ScoreComparisonChart
-            finalScore={analysis.finalScore}
-            financialScore={analysis.financialScore}
-            newsScore={analysis.newsScore}
-            riskScore={analysis.riskScore}
-          />
-        </div>
-
-        {/* Row 4: Metrics summary & Detailed Analysis Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Columns: Qualitative Detail Lists */}
-          <div className="lg:col-span-2 space-y-8">
+          <main className="space-y-6 mt-6">
             
-            {/* Core Ratios Quick Bar */}
-            <div className="grid grid-cols-3 gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-md">
-              <div className="text-center">
-                <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">PE Ratio</span>
-                <span className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">
-                  {metrics.peRatio || 'N/A'}
-                </span>
-              </div>
-              <div className="text-center border-x border-slate-100 dark:border-slate-800/80">
-                <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">YoY Growth</span>
-                <span className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">
-                  {typeof metrics.revenueGrowth === 'number'
-                    ? `${(metrics.revenueGrowth * 100).toFixed(2)}%`
-                    : 'N/A'}
-                </span>
-              </div>
-              <div className="text-center">
-                <span className="text-xs font-semibold text-slate-400 block tracking-wide uppercase">ROE</span>
-                <span className="text-sm sm:text-base font-extrabold text-slate-850 dark:text-slate-200 mt-1 block">
-                  {typeof metrics.roe === 'number' ? `${(metrics.roe * 100).toFixed(2)}%` : 'N/A'}
-                </span>
-              </div>
+            {/* Row 1: Sub-Score Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <ScoreCard title="Consensus Score" score={analysis.finalScore} type="final" />
+              <ScoreCard title="Financial Score" score={analysis.financialScore} type="financial" />
+              <ScoreCard title="Sentiment Score" score={analysis.newsScore} type="news" />
+              <ScoreCard title="Risk Safety Score" score={analysis.riskScore} type="risk" />
             </div>
 
-            {/* Strengths & Weaknesses Grids */}
+            {/* Row 2: Chart & Recommendation Card */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Left Column: Recharts Price Trend AreaChart */}
+              <div className="lg:col-span-2 p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm hover:scale-[1.01] transition-all duration-150 flex flex-col justify-between animate-fadeInUp">
+                <div>
+                  <h3 className="text-[10px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider mb-4">
+                    30-Day Historical Close Price ($)
+                  </h3>
+                </div>
+                <div className="h-80 w-full flex items-center justify-center">
+                  {historicalData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={historicalData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorClose" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
+                            <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" vertical={false} />
+                        <XAxis
+                          dataKey="date"
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fontSize: 9, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans' }}
+                          dy={10}
+                        />
+                        <YAxis
+                          domain={['auto', 'auto']}
+                          tickLine={false}
+                          axisLine={false}
+                          tick={{ fontSize: 9, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans' }}
+                          dx={-10}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            backgroundColor: '#111827',
+                            border: '1px solid #1F2937',
+                            borderRadius: '6px',
+                            color: '#F8FAFC',
+                            fontFamily: 'Plus Jakarta Sans',
+                            fontSize: '0.75rem'
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="close"
+                          stroke="#10B981"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#colorClose)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div className="text-center p-6 space-y-2">
+                      <BarChart2 className="h-8 w-8 text-[#94A3B8]/40 mx-auto" />
+                      <p className="text-xs text-[#94A3B8] font-sans font-bold uppercase tracking-wider">
+                        Historical metrics unavailable
+                      </p>
+                      <p className="text-[10px] text-[#94A3B8]/65 max-w-sm mx-auto font-sans tracking-wide leading-relaxed">
+                        Live interactive charts are available on new analysis runs. Database archives only preserve executive synthesis and scoring metrics.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Recommendation summary */}
+              <div>
+                <RecommendationCard
+                  recommendation={analysis.recommendation}
+                  confidence={analysis.confidence}
+                  score={analysis.finalScore}
+                />
+              </div>
+
+            </div>
+
+            {/* Row 3: Analytical Charts Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <StrengthsCard
-                strengths={analysis.strengths}
-                positiveFactors={analysis.positiveFactors}
-                isArchive={isHistoryRecord}
+              <FinancialBreakdownChart
+                score={analysis.financialScore}
+                breakdown={analysis.breakdown}
               />
-              <WeaknessCard
-                weaknesses={analysis.weaknesses}
-                negativeFactors={analysis.negativeFactors}
-                isArchive={isHistoryRecord}
+              <ScoreComparisonChart
+                finalScore={analysis.finalScore}
+                financialScore={analysis.financialScore}
+                newsScore={analysis.newsScore}
+                riskScore={analysis.riskScore}
               />
             </div>
 
-            {/* Threat & Risk Card */}
-            <RiskCard
-              risks={analysis.risks}
-              mitigationFactors={analysis.mitigationFactors}
-              isArchive={isHistoryRecord}
-            />
-          </div>
+            {/* Row 4: Metrics summary & Detailed Analysis Cards Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Left Columns: Qualitative Detail Lists */}
+              <div className="lg:col-span-2 space-y-6">
+                
+                {/* Core Ratios Quick Bar */}
+                <div className="grid grid-cols-3 gap-4 p-4 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm animate-fadeInUp">
+                  <div className="text-center">
+                    <span className="text-[9px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">PE Ratio</span>
+                    <span className="text-xs font-mono font-bold text-[#F8FAFC] tracking-tight mt-1 block tabular-nums">
+                      {metrics.peRatio || 'N/A'}
+                    </span>
+                  </div>
+                  <div className="text-center border-x border-[#1F2937]">
+                    <span className="text-[9px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">YoY Growth</span>
+                    <span className="text-xs font-mono font-bold text-[#F8FAFC] tracking-tight mt-1 block tabular-nums">
+                      {typeof metrics.revenueGrowth === 'number'
+                        ? `${(metrics.revenueGrowth * 100).toFixed(2)}%`
+                        : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="text-center">
+                    <span className="text-[9px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">ROE</span>
+                    <span className="text-xs font-mono font-bold text-[#F8FAFC] tracking-tight mt-1 block tabular-nums">
+                      {typeof metrics.roe === 'number' ? `${(metrics.roe * 100).toFixed(2)}%` : 'N/A'}
+                    </span>
+                  </div>
+                </div>
 
-          {/* Right Column: AI Research Report Card */}
-          <div className="lg:col-span-1">
-            <ReportCard report={reportText} />
-          </div>
+                {/* Strengths & Weaknesses Grids */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <StrengthsCard
+                    strengths={analysis.strengths}
+                    positiveFactors={analysis.positiveFactors}
+                    isArchive={isHistoryRecord}
+                  />
+                  <WeaknessCard
+                    weaknesses={analysis.weaknesses}
+                    negativeFactors={analysis.negativeFactors}
+                    isArchive={isHistoryRecord}
+                  />
+                </div>
 
-        </div>
+                {/* Risk and Moat Grid */}
+                <RiskCard
+                  risks={analysis.risks}
+                  mitigationFactors={analysis.mitigationFactors}
+                  isArchive={isHistoryRecord}
+                />
+              </div>
+
+              {/* Right Column: AI Research Report Card */}
+              <div className="lg:col-span-1">
+                <ReportCard report={reportText} />
+              </div>
+
+            </div>
 
           </main>
         </div>

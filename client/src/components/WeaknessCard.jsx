@@ -1,34 +1,34 @@
 import React from 'react';
-import { XCircle, TrendingDown } from 'lucide-react';
+import { ShieldAlert, TrendingDown } from 'lucide-react';
 
 /**
  * WeaknessCard Component.
- * Displays financial weaknesses and negative news sentiment pressures.
+ * Styled as a qualitative headwinds tracker inside the research workspace.
  */
 export const WeaknessCard = ({ weaknesses = [], negativeFactors = [], isArchive = false }) => {
   return (
-    <div className="p-6 rounded-2xl border border-rose-100 dark:border-rose-955 bg-white dark:bg-slate-900 shadow-md transition-all duration-300 hover:shadow-lg">
-      <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-6">
-        <XCircle className="h-5 w-5 text-rose-500" />
-        Weaknesses & Negative Drivers
+    <div className="p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm hover:scale-[1.01] transition-all duration-150 animate-fadeInUp">
+      <h3 className="text-sm font-sans font-semibold text-[#F8FAFC] flex items-center gap-2 mb-5 uppercase tracking-wide">
+        <ShieldAlert className="h-4.5 w-4.5 text-[#EF4444]" />
+        WEAKNESSES & PRESSURE
       </h3>
 
-      <div className="space-y-6">
+      <div className="space-y-5">
         {/* Core Weaknesses */}
         <div>
-          <h4 className="text-xs font-bold text-rose-555 dark:text-rose-400 uppercase tracking-wider mb-3">
-            Financial & Operational Weaknesses
+          <h4 className="text-[10px] font-mono font-bold text-[#EF4444] uppercase tracking-wider mb-2.5">
+            // Financial & Operational Weaknesses
           </h4>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {weaknesses && weaknesses.length > 0 ? (
               weaknesses.map((item, idx) => (
-                <li key={idx} className="flex gap-2.5 items-start text-sm text-slate-650 dark:text-slate-350 leading-relaxed font-medium">
-                  <span className="text-rose-500 font-bold mt-0.5">✗</span>
+                <li key={idx} className="flex gap-2 items-start text-xs font-sans text-[#94A3B8] leading-relaxed">
+                  <span className="text-[#EF4444] font-bold shrink-0 font-mono">[-]</span>
                   <span>{item}</span>
                 </li>
               ))
             ) : (
-              <li className="text-sm text-slate-400 dark:text-slate-500 italic list-none">
+              <li className="text-[11px] font-mono text-[#64748B] italic list-none">
                 {isArchive ? 'Archived: Detailed weaknesses list not preserved.' : 'No operational weaknesses identified.'}
               </li>
             )}
@@ -36,21 +36,21 @@ export const WeaknessCard = ({ weaknesses = [], negativeFactors = [], isArchive 
         </div>
 
         {/* Sentiment Pressures */}
-        <div className="pt-4 border-t border-slate-100 dark:border-slate-800/60">
-          <h4 className="text-xs font-bold text-rose-555 dark:text-rose-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+        <div className="pt-4 border-t border-[#1F2937]">
+          <h4 className="text-[10px] font-mono font-bold text-[#EF4444] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
             <TrendingDown className="h-3.5 w-3.5" />
-            Market & Sentiment Pressures
+            // Market & Sentiment Pressures
           </h4>
-          <ul className="space-y-3">
+          <ul className="space-y-2">
             {negativeFactors && negativeFactors.length > 0 ? (
               negativeFactors.map((item, idx) => (
-                <li key={idx} className="flex gap-2.5 items-start text-sm text-slate-650 dark:text-slate-350 leading-relaxed font-medium">
-                  <span className="text-rose-500 font-extrabold text-xs mt-1">▼</span>
+                <li key={idx} className="flex gap-2 items-start text-xs font-sans text-[#94A3B8] leading-relaxed">
+                  <span className="text-[#EF4444] font-bold shrink-0 font-mono">[-]</span>
                   <span>{item}</span>
                 </li>
               ))
             ) : (
-              <li className="text-sm text-slate-400 dark:text-slate-500 italic list-none">
+              <li className="text-[11px] font-mono text-[#64748B] italic list-none">
                 {isArchive ? 'Archived: Negative factors list not preserved.' : 'No negative sentiment pressures identified.'}
               </li>
             )}
