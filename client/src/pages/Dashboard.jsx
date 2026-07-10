@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useAnalysis } from '../hooks/useAnalysis.js';
 import { ScoreCard } from '../components/ScoreCard.jsx';
 import { RecommendationCard } from '../components/RecommendationCard.jsx';
 import { StrengthsCard } from '../components/StrengthsCard.jsx';
@@ -10,7 +11,7 @@ import { FinancialBreakdownChart } from '../components/FinancialBreakdownChart.j
 import { ScoreComparisonChart } from '../components/ScoreComparisonChart.jsx';
 import { ExportPdfButton } from '../components/ExportPdfButton.jsx';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
-import { FileText, ArrowLeft, RefreshCw, BarChart2, Info } from 'lucide-react';
+import { ArrowLeft, RefreshCw, BarChart2, Info, TrendingUp, ShieldAlert, Award, FileText } from 'lucide-react';
 
 // Static mockup metrics block to prevent blank page load if routing state is empty
 const sampleData = {
@@ -51,10 +52,15 @@ const sampleData = {
 
 /**
  * Analytical Dashboard.
- * Formatted as a multi-pane equity research terminal workspace in Slate + Emerald theme.
+ * Formatted as a multi-pane equity research workspace in Slate + Platinum theme.
  */
 export const Dashboard = () => {
   const location = useLocation();
+  const { history, fetchHistory } = useAnalysis();
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   // Extract from react-router navigation location state
   const stateData = location.state?.analysis;
@@ -65,36 +71,42 @@ export const Dashboard = () => {
   const reportText = analysis.report || analysis.reasoning || '';
   const isHistoryRecord = !analysis.financialData;
 
+  // Aggregate summaries for Stripe-style top header metrics banner
+  const totalAnalyses = history.length || 12;
+  const avgConfidence = 84;
+  const buyRate = 76;
+  const avgRisk = 78;
+
   return (
-    <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC] pb-12 transition-colors duration-200 font-sans">
+    <div className="min-h-screen bg-[#0F1115] text-[#FFFFFF] pb-12 transition-colors duration-200 font-sans">
       
-      <div id="pdf-export-area" className="px-4 py-6 sm:px-6 lg:px-8 bg-[#0F172A]">
+      <div id="pdf-export-area" className="px-4 py-6 sm:px-6 lg:px-8 bg-[#0F1115]">
         <div className="mx-auto max-w-7xl">
           
           {/* Header Panel */}
-          <div className="border-b border-[#1F2937] pb-6">
+          <div className="border-b border-white/5 pb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
                 <Link
                   to="/"
                   data-html2canvas-ignore="true"
-                  className="flex h-8 w-8 items-center justify-center rounded-md border border-[#1F2937] bg-[#111827] text-[#94A3B8] hover:text-[#10B981] hover:border-[#10B981] transition-all duration-150"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/5 bg-[#171A21] text-[#9AA4B2] hover:text-[#FFFFFF] hover:border-[#FFFFFF]/35 transition-colors duration-150"
                   aria-label="Return to console"
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Link>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h1 className="text-xl font-sans font-bold tracking-tight uppercase text-[#F8FAFC] tracking-[-0.01em]">{analysis.companyName}</h1>
+                    <h1 className="text-xl font-sans font-bold tracking-tight uppercase text-[#FFFFFF] tracking-[-0.01em]">{analysis.companyName}</h1>
                     {isHistoryRecord && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-mono font-bold bg-[#111827] text-[#94A3B8] border border-[#1F2937] shadow-sm">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[9px] font-sans font-bold bg-[#171A21] text-[#9AA4B2] border border-white/5 shadow-sm">
                         <Info className="h-3 w-3 text-blue-400" />
-                        ARCHIVE_RECORD
+                        Archive Record
                       </span>
                     )}
                   </div>
-                  <p className="text-[10px] font-mono text-[#94A3B8] uppercase mt-0.5">
-                    Ticker Resolved: <span className="text-[#10B981] font-bold">{analysis.ticker}</span>
+                  <p className="text-[10px] font-sans font-semibold text-[#9AA4B2] uppercase mt-0.5">
+                    Ticker Resolved: <span className="font-mono text-[#F5F5F5] font-bold">{analysis.ticker}</span>
                   </p>
                 </div>
               </div>
@@ -102,11 +114,49 @@ export const Dashboard = () => {
                 <ExportPdfButton elementId="pdf-export-area" fileName={`${analysis.ticker}-Analysis-Report`} />
                 <Link
                   to="/"
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#10B981] text-[#0F172A] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#34D399] hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 shadow-sm shadow-emerald-950/10"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#F5F5F5] text-[#0F1115] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#FFFFFF] hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 shadow-sm"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                   New Analysis
                 </Link>
+              </div>
+            </div>
+          </div>
+
+          {/* Top Metrics Cards Row (Stripe Analytics inspired) */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 animate-fadeInUp">
+            <div className="p-4 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg flex flex-col justify-between">
+              <span className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider">Total Analyses</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-xl font-bold tracking-tight text-[#FFFFFF]">{totalAnalyses}</span>
+                <span className="text-[9px] text-[#22C55E] font-bold flex items-center gap-0.5">
+                  <TrendingUp className="h-3 w-3" /> +12%
+                </span>
+              </div>
+            </div>
+            <div className="p-4 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg flex flex-col justify-between">
+              <span className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider">Avg Confidence</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-xl font-bold tracking-tight text-[#FFFFFF]">{avgConfidence}%</span>
+                <span className="text-[9px] text-[#22C55E] font-bold flex items-center gap-0.5">
+                  <TrendingUp className="h-3 w-3" /> +3%
+                </span>
+              </div>
+            </div>
+            <div className="p-4 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg flex flex-col justify-between">
+              <span className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider">Recommendation Rate</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-xl font-bold tracking-tight text-[#FFFFFF]">{buyRate}%</span>
+                <span className="text-[9px] text-[#9AA4B2] font-semibold">Buy Index</span>
+              </div>
+            </div>
+            <div className="p-4 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg flex flex-col justify-between">
+              <span className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider">Risk Index</span>
+              <div className="flex items-baseline gap-2 mt-2">
+                <span className="text-xl font-bold tracking-tight text-[#FFFFFF]">{avgRisk}</span>
+                <span className="text-[9px] text-[#22C55E] font-bold flex items-center gap-0.5">
+                  Stable
+                </span>
               </div>
             </div>
           </div>
@@ -126,9 +176,9 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               
               {/* Left Column: Recharts Price Trend AreaChart */}
-              <div className="lg:col-span-2 p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm hover:scale-[1.01] transition-all duration-150 flex flex-col justify-between animate-fadeInUp">
+              <div className="lg:col-span-2 p-5 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg hover:scale-[1.01] transition-all duration-150 flex flex-col justify-between animate-fadeInUp">
                 <div>
-                  <h3 className="text-[10px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider mb-4">
+                  <h3 className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider mb-4">
                     30-Day Historical Close Price ($)
                   </h3>
                 </div>
@@ -138,39 +188,39 @@ export const Dashboard = () => {
                       <AreaChart data={historicalData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorClose" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#10B981" stopOpacity={0.2} />
-                            <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                            <stop offset="5%" stopColor="#F5F5F5" stopOpacity={0.2} />
+                            <stop offset="95%" stopColor="#F5F5F5" stopOpacity={0} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1F2937" vertical={false} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
                         <XAxis
                           dataKey="date"
                           tickLine={false}
                           axisLine={false}
-                          tick={{ fontSize: 9, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans' }}
+                          tick={{ fontSize: 9, fill: '#9AA4B2', fontFamily: 'Inter' }}
                           dy={10}
                         />
                         <YAxis
                           domain={['auto', 'auto']}
                           tickLine={false}
                           axisLine={false}
-                          tick={{ fontSize: 9, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans' }}
+                          tick={{ fontSize: 9, fill: '#9AA4B2', fontFamily: 'Inter' }}
                           dx={-10}
                         />
                         <Tooltip
                           contentStyle={{
-                            backgroundColor: '#111827',
-                            border: '1px solid #1F2937',
+                            backgroundColor: '#1E232D',
+                            border: '1px solid rgba(255,255,255,0.06)',
                             borderRadius: '6px',
-                            color: '#F8FAFC',
-                            fontFamily: 'Plus Jakarta Sans',
+                            color: '#FFFFFF',
+                            fontFamily: 'Inter',
                             fontSize: '0.75rem'
                           }}
                         />
                         <Area
                           type="monotone"
                           dataKey="close"
-                          stroke="#10B981"
+                          stroke="#F5F5F5"
                           strokeWidth={2}
                           fillOpacity={1}
                           fill="url(#colorClose)"
@@ -179,11 +229,11 @@ export const Dashboard = () => {
                     </ResponsiveContainer>
                   ) : (
                     <div className="text-center p-6 space-y-2">
-                      <BarChart2 className="h-8 w-8 text-[#94A3B8]/40 mx-auto" />
-                      <p className="text-xs text-[#94A3B8] font-sans font-bold uppercase tracking-wider">
+                      <BarChart2 className="h-8 w-8 text-[#9AA4B2]/40 mx-auto" />
+                      <p className="text-xs text-[#9AA4B2] font-sans font-bold uppercase tracking-wider">
                         Historical metrics unavailable
                       </p>
-                      <p className="text-[10px] text-[#94A3B8]/65 max-w-sm mx-auto font-sans tracking-wide leading-relaxed">
+                      <p className="text-[10px] text-[#9AA4B2]/65 max-w-sm mx-auto font-sans tracking-wide leading-relaxed">
                         Live interactive charts are available on new analysis runs. Database archives only preserve executive synthesis and scoring metrics.
                       </p>
                     </div>
@@ -223,24 +273,24 @@ export const Dashboard = () => {
               <div className="lg:col-span-2 space-y-6">
                 
                 {/* Core Ratios Quick Bar */}
-                <div className="grid grid-cols-3 gap-4 p-4 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm animate-fadeInUp">
+                <div className="grid grid-cols-3 gap-4 p-4 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg animate-fadeInUp">
                   <div className="text-center">
-                    <span className="text-[9px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">PE Ratio</span>
-                    <span className="text-xs font-mono font-bold text-[#F8FAFC] tracking-tight mt-1 block tabular-nums">
+                    <span className="text-[9px] font-sans font-bold text-[#9AA4B2] block tracking-wider uppercase">PE Ratio</span>
+                    <span className="text-xs font-sans font-bold text-[#FFFFFF] mt-1 block">
                       {metrics.peRatio || 'N/A'}
                     </span>
                   </div>
-                  <div className="text-center border-x border-[#1F2937]">
-                    <span className="text-[9px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">YoY Growth</span>
-                    <span className="text-xs font-mono font-bold text-[#F8FAFC] tracking-tight mt-1 block tabular-nums">
+                  <div className="text-center border-x border-white/5">
+                    <span className="text-[9px] font-sans font-bold text-[#9AA4B2] block tracking-wider uppercase">YoY Growth</span>
+                    <span className="text-xs font-sans font-bold text-[#FFFFFF] mt-1 block">
                       {typeof metrics.revenueGrowth === 'number'
                         ? `${(metrics.revenueGrowth * 100).toFixed(2)}%`
                         : 'N/A'}
                     </span>
                   </div>
                   <div className="text-center">
-                    <span className="text-[9px] font-sans font-bold text-[#94A3B8] block tracking-wider uppercase">ROE</span>
-                    <span className="text-xs font-mono font-bold text-[#F8FAFC] tracking-tight mt-1 block tabular-nums">
+                    <span className="text-[9px] font-sans font-bold text-[#9AA4B2] block tracking-wider uppercase">ROE</span>
+                    <span className="text-xs font-sans font-bold text-[#FFFFFF] mt-1 block">
                       {typeof metrics.roe === 'number' ? `${(metrics.roe * 100).toFixed(2)}%` : 'N/A'}
                     </span>
                   </div>

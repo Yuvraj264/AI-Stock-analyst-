@@ -88,21 +88,21 @@ export const Compare = () => {
   const activeError = apiError || localError;
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-[#F8FAFC] pb-12 transition-colors duration-200 font-sans">
+    <div className="min-h-screen bg-[#0F1115] text-[#FFFFFF] pb-12 transition-colors duration-200 font-sans">
       
       {/* Header Panel */}
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 border-b border-[#1F2937]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 border-b border-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3 animate-fadeIn">
             <button
               onClick={() => navigate('/')}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-[#1F2937] bg-[#111827] text-[#94A3B8] hover:text-[#10B981] hover:border-[#10B981] transition-colors duration-150 cursor-pointer"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-white/5 bg-[#171A21] text-[#9AA4B2] hover:text-[#FFFFFF] hover:border-[#FFFFFF]/35 transition-colors duration-150 cursor-pointer"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <div>
               <h1 className="text-xl font-sans font-bold uppercase tracking-wide tracking-[-0.01em]">Compare Workspace</h1>
-              <p className="text-[10px] font-mono text-[#94A3B8] uppercase mt-0.5">
+              <p className="text-[10px] font-sans font-semibold text-[#9AA4B2] uppercase mt-0.5">
                 Run comparative multi-agent analyses side-by-side
               </p>
             </div>
@@ -114,41 +114,41 @@ export const Compare = () => {
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 space-y-6">
         
         {/* Step 1: Input Targets */}
-        <form onSubmit={handleCompare} className="p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm animate-fadeInUp">
-          <h3 className="text-[10px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider mb-4 flex items-center gap-1.5">
-            <Layers className="h-3.5 w-3.5 text-[#10B981]" />
+        <form onSubmit={handleCompare} className="p-5 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg animate-fadeInUp">
+          <h3 className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider mb-4 flex items-center gap-1.5">
+            <Layers className="h-3.5 w-3.5 text-[#F5F5F5]" />
             [1] Enter Target Stock Companies
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Input A */}
             <div className="space-y-1.5">
-              <label className="text-[9px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider block">Company A</label>
+              <label className="text-[9px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider block">Company A</label>
               <input
                 type="text"
                 placeholder="Enter Company or Ticker (e.g. Tesla)"
                 value={inputA}
                 onChange={(e) => setInputA(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 rounded border border-[#1F2937] bg-[#0F172A] text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:border-[#10B981] text-xs font-sans font-medium uppercase tracking-wide shadow-sm"
+                className="w-full px-3 py-2 rounded-lg border border-white/5 bg-[#171A21] text-[#FFFFFF] placeholder-[#9AA4B2]/60 focus:outline-none focus:border-[#F5F5F5]/30 text-xs font-sans font-medium uppercase tracking-wide shadow-sm"
               />
-              <span className="text-[9px] font-mono text-[#94A3B8]/60 block uppercase mt-0.5">
+              <span className="text-[9px] font-sans font-bold text-[#9AA4B2]/60 block uppercase mt-0.5">
                 {stockA ? `SELECTED: ${stockA.companyName} (${stockA.ticker})` : 'Or select from pool below.'}
               </span>
             </div>
 
             {/* Input B */}
             <div className="space-y-1.5">
-              <label className="text-[9px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider block">Company B</label>
+              <label className="text-[9px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider block">Company B</label>
               <input
                 type="text"
                 placeholder="Enter Company or Ticker (e.g. Microsoft)"
                 value={inputB}
                 onChange={(e) => setInputB(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 rounded border border-[#1F2937] bg-[#0F172A] text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:border-[#10B981] text-xs font-sans font-medium uppercase tracking-wide shadow-sm"
+                className="w-full px-3 py-2 rounded-lg border border-white/5 bg-[#171A21] text-[#FFFFFF] placeholder-[#9AA4B2]/60 focus:outline-none focus:border-[#F5F5F5]/30 text-xs font-sans font-medium uppercase tracking-wide shadow-sm"
               />
-              <span className="text-[9px] font-mono text-[#94A3B8]/60 block uppercase mt-0.5">
+              <span className="text-[9px] font-sans font-bold text-[#9AA4B2]/60 block uppercase mt-0.5">
                 {stockB ? `SELECTED: ${stockB.companyName} (${stockB.ticker})` : 'Or select from pool below.'}
               </span>
             </div>
@@ -158,7 +158,7 @@ export const Compare = () => {
             <button
               type="submit"
               disabled={isLoading || !inputA.trim() || !inputB.trim()}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#10B981] text-[#0F172A] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#34D399] hover:scale-[1.02] active:scale-[0.98] disabled:bg-[#1F2937] disabled:text-[#94A3B8]/50 disabled:scale-100 transition-all cursor-pointer shadow-sm shadow-emerald-950/10"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-[#F5F5F5] text-[#0F1115] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#FFFFFF] hover:scale-[1.02] active:scale-[0.98] disabled:bg-[#171A21] disabled:text-[#9AA4B2]/50 disabled:scale-100 transition-all cursor-pointer shadow-sm"
             >
               {isLoading ? (
                 <>
@@ -177,8 +177,8 @@ export const Compare = () => {
 
         {/* Error Notice */}
         {activeError && (
-          <div className="p-3 bg-[#111827] border border-[#EF4444]/30 text-[#EF4444] font-mono text-xs text-center uppercase tracking-wider rounded-md max-w-md mx-auto shadow-sm">
-            ERROR // {activeError}
+          <div className="p-3 bg-[#1E232D] border border-[#EF4444]/30 text-[#EF4444] font-sans text-xs text-center uppercase tracking-wider rounded-md max-w-md mx-auto shadow-sm">
+            Error: {activeError}
           </div>
         )}
 
@@ -187,7 +187,7 @@ export const Compare = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <div className="p-5 bg-[#111827] border border-[#1F2937] rounded-lg space-y-3 shadow-sm">
+                <div className="p-5 bg-[#1E232D] border border-white/5 rounded-lg space-y-3 shadow-sm">
                   <SkeletonBase className="h-4 w-40 mb-4 animate-pulse" />
                   <SkeletonBase className="h-8 w-full animate-pulse" />
                   <SkeletonBase className="h-8 w-full animate-pulse" />
@@ -216,9 +216,9 @@ export const Compare = () => {
             </div>
 
             {/* Recharts comparison bar chart */}
-            <div className="p-5 bg-[#111827] border border-[#1F2937] rounded-lg shadow-sm animate-fadeInUp">
-              <h3 className="text-[10px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider mb-4">
-                CORE METRICS SUMMARY COMP
+            <div className="p-5 bg-[#1E232D] border border-white/5 rounded-xl shadow-lg animate-fadeInUp">
+              <h3 className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider mb-4">
+                Core Metrics Summary Comp
               </h3>
               <div className="h-80 w-full">
                 <ResponsiveContainer width="100%" height="100%">
@@ -227,29 +227,29 @@ export const Compare = () => {
                       dataKey="category"
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fontSize: 9, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans' }}
+                      tick={{ fontSize: 9, fill: '#9AA4B2', fontFamily: 'Inter' }}
                       dy={10}
                     />
                     <YAxis
                       domain={[0, 100]}
                       tickLine={false}
                       axisLine={false}
-                      tick={{ fontSize: 9, fill: '#94A3B8', fontFamily: 'Plus Jakarta Sans' }}
+                      tick={{ fontSize: 9, fill: '#9AA4B2', fontFamily: 'Inter' }}
                       dx={-10}
                     />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#111827',
-                        border: '1px solid #1F2937',
+                        backgroundColor: '#1E232D',
+                        border: '1px solid rgba(255, 255, 255, 0.06)',
                         borderRadius: '6px',
-                        color: '#F8FAFC',
-                        fontFamily: 'Plus Jakarta Sans',
+                        color: '#FFFFFF',
+                        fontFamily: 'Inter',
                         fontSize: '0.75rem'
                       }}
                     />
-                    <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 10, fontFamily: 'Plus Jakarta Sans', fontWeight: 'bold' }} />
-                    <Bar dataKey={stockA.ticker} fill="#10B981" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey={stockB.ticker} fill="#3b82f6" radius={[4, 4, 0, 0]} />
+                    <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: 10, fontFamily: 'Inter', fontWeight: 'bold' }} />
+                    <Bar dataKey={stockA.ticker} fill="#F5F5F5" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey={stockB.ticker} fill="#D1D5DB" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -259,12 +259,12 @@ export const Compare = () => {
 
         {/* Selection Pool Container */}
         <div className="animate-fadeInUp">
-          <h3 className="text-[10px] font-sans font-bold text-[#94A3B8] uppercase tracking-wider mb-4">
+          <h3 className="text-[10px] font-sans font-bold text-[#9AA4B2] uppercase tracking-wider mb-4">
             Analysis Selection Pool (Historical Runs)
           </h3>
 
           {history.length === 0 ? (
-            <div className="p-5 bg-[#111827] border border-[#1F2937] rounded-lg text-center text-[#94A3B8] font-sans uppercase text-[10px] tracking-wide shadow-sm">
+            <div className="p-5 bg-[#1E232D] border border-white/5 rounded-xl text-center text-[#9AA4B2] font-sans uppercase text-[10px] tracking-wide shadow-sm">
               Please analyze some companies on the Home page first to populate this quick selection pool.
             </div>
           ) : (
@@ -272,24 +272,24 @@ export const Compare = () => {
               {history.map((record) => (
                 <div
                   key={record._id}
-                  className="flex items-center justify-between p-3.5 bg-[#111827] border border-[#1F2937] hover:border-[#1F2937]/80 rounded-lg font-sans text-xs shadow-sm hover:scale-[1.01] transition-all duration-150"
+                  className="flex items-center justify-between p-3.5 bg-[#1E232D] border border-white/5 hover:border-white/10 rounded-xl font-sans text-xs shadow-lg hover:scale-[1.01] transition-all duration-150"
                 >
                   <div className="min-w-0 pr-2">
-                    <span className="block text-[#F8FAFC] font-bold truncate uppercase">{record.companyName}</span>
-                    <span className="text-[9px] text-[#94A3B8] mt-0.5 block uppercase">
-                      TICKER: <span className="text-[#10B981] font-extrabold">{record.ticker}</span>
+                    <span className="block text-[#FFFFFF] font-bold truncate uppercase">{record.companyName}</span>
+                    <span className="text-[9px] text-[#9AA4B2] mt-0.5 block uppercase">
+                      Ticker: <span className="font-mono text-[#F5F5F5] font-extrabold">{record.ticker}</span>
                     </span>
                   </div>
                   <div className="flex gap-1 shrink-0">
                     <button
                       onClick={() => handleQuickSelect(record, 'A')}
-                      className="px-2 py-0.5 text-[9px] bg-[#0F172A] border border-[#1F2937] text-[#94A3B8] hover:text-[#10B981] hover:border-[#10B981] rounded-md transition-colors cursor-pointer"
+                      className="px-2.5 py-1 text-[9px] bg-[#171A21] border border-white/5 text-[#9AA4B2] hover:text-[#FFFFFF] hover:border-white/20 rounded-md transition-colors cursor-pointer"
                     >
                       A
                     </button>
                     <button
                       onClick={() => handleQuickSelect(record, 'B')}
-                      className="px-2 py-0.5 text-[9px] bg-[#0F172A] border border-[#1F2937] text-[#94A3B8] hover:text-blue-450 hover:border-blue-500 rounded-md transition-colors cursor-pointer"
+                      className="px-2.5 py-1 text-[9px] bg-[#171A21] border border-white/5 text-[#9AA4B2] hover:text-[#FFFFFF] hover:border-white/20 rounded-md transition-colors cursor-pointer"
                     >
                       B
                     </button>

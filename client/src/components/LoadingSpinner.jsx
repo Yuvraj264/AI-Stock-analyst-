@@ -3,23 +3,23 @@ import { Loader2, CheckCircle2, Circle } from 'lucide-react';
 
 /**
  * Premium step-by-step loading screen.
- * Configured with Slate + Emerald style presets: rounded-lg card, emerald active spinner.
+ * Configured with Slate + Platinum style presets: rounded-xl card, platinum active spinner.
  */
 export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, onFinished }) => {
   const [activeStep, setActiveStep] = useState(0);
 
   const steps = [
-    `Connecting to Yahoo Finance API and resolving ticker...`,
+    `Connecting to financial indexes and resolving ticker...`,
     `Fetching annual balance sheets and quarterly cash flows...`,
-    `Scraping recent media headlines and article databases...`,
-    `Invoking Gemini API to parse and score market sentiment...`,
+    `Scraping recent press releases and news databases...`,
+    `Invoking research model nodes to score market sentiment...`,
     `Running quantitative models to score financial health...`,
     `Evaluating competitive, regulatory, and valuation risks...`,
-    `Assembling multi-agent analysis state and compiling report...`
+    `Assembling consensus state and compiling final report...`
   ];
 
   useEffect(() => {
-    // If API finishes, we run remaining steps rapidly (every 200ms) for high-performance terminal feel.
+    // If API finishes, run remaining steps rapidly (every 200ms) for high-performance feel.
     const intervalDuration = isApiFinished ? 200 : 2000;
 
     const interval = setInterval(() => {
@@ -46,22 +46,22 @@ export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, o
   }, [activeStep, isApiFinished, onFinished, steps.length]);
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-[#111827] border border-[#1F2937] rounded-lg shadow-md animate-fadeInUp">
+    <div className="flex flex-col items-center justify-center p-8 w-full max-w-lg mx-auto bg-[#1A1A1A] border border-[#2D2D2D] rounded-xl shadow-lg animate-fadeInUp">
       
-      {/* Pulse status indicator */}
+      {/* status indicator */}
       <div className="relative flex items-center justify-center h-14 w-14 mb-4">
-        <Loader2 className="h-8 w-8 text-[#10B981] animate-spin" />
+        <Loader2 className="h-8 w-8 text-[#C0C0C0] animate-spin" />
       </div>
 
-      <h3 className="text-sm font-sans font-bold text-[#F8FAFC] uppercase tracking-wider text-center">
+      <h3 className="text-sm font-sans font-bold text-[#FFFFFF] tracking-tight uppercase text-center">
         Analyzing {companyName}
       </h3>
-      <p className="mt-1 text-[10px] font-mono text-[#94A3B8] uppercase tracking-wide text-center">
-        EXEC_GRAPH_CONSENSUS: PROCESSING DATASTREAM
+      <p className="mt-1 text-[10px] text-[#B5B5B5] font-semibold uppercase tracking-wide text-center">
+        Compiling multi-agent research consensus...
       </p>
 
       {/* Ticking checks */}
-      <div className="w-full mt-6 space-y-3 pt-4 border-t border-[#1F2937]">
+      <div className="w-full mt-6 space-y-3 pt-4 border-t border-[#2D2D2D]">
         {steps.map((text, idx) => {
           const isCompleted = idx < activeStep;
           const isActive = idx === activeStep;
@@ -70,36 +70,30 @@ export const LoadingSpinner = ({ companyName = 'Stock', isApiFinished = false, o
             <div
               key={idx}
               className={`flex items-start gap-2.5 transition-opacity duration-150 ${
-                isCompleted || isActive ? 'opacity-100' : 'opacity-30'
+                isCompleted || isActive ? 'opacity-100' : 'opacity-35'
               }`}
             >
               {isCompleted ? (
-                <CheckCircle2 className="h-4 w-4 text-[#10B981] shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 text-[#2ECC71] shrink-0 mt-0.5" />
               ) : isActive ? (
-                <Loader2 className="h-4 w-4 text-[#10B981] shrink-0 animate-spin mt-0.5" />
+                <Loader2 className="h-4 w-4 text-[#C0C0C0] shrink-0 animate-spin mt-0.5" />
               ) : (
-                <Circle className="h-4 w-4 text-[#1F2937] shrink-0 mt-0.5" />
+                <Circle className="h-4 w-4 text-[#FFFFFF]/10 shrink-0 mt-0.5" />
               )}
               <span
-                className={`text-[10px] font-mono tracking-wide leading-relaxed uppercase ${
+                className={`text-[10px] font-sans font-semibold tracking-wide leading-relaxed uppercase ${
                   isActive
-                    ? 'text-[#10B981] font-bold'
+                    ? 'text-[#C0C0C0] font-bold'
                     : isCompleted
-                    ? 'text-[#94A3B8]'
-                    : 'text-[#64748B]'
+                    ? 'text-[#B5B5B5]'
+                    : 'text-[#B5B5B5]/60'
                 }`}
               >
-                [{idx + 1}] {text}
+                {text}
               </span>
             </div>
           );
         })}
-      </div>
-
-      {/* Terminal Footer Info */}
-      <div className="w-full mt-6 pt-3 border-t border-[#1F2937] flex items-center justify-between text-[8px] font-mono text-[#64748B] tracking-wider uppercase">
-        <span>STATUS: WORKING</span>
-        <span>SYS_LOG: OK</span>
       </div>
 
     </div>

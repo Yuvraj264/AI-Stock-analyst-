@@ -1,32 +1,34 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* Design System Color Tokens for Slate + Emerald Theme */
+/* Design System Color Tokens for Premium Institutional Finance Platform */
 @theme {
-  --color-bg-terminal: #0F172A;
-  --color-surface-terminal: #111827;
-  --color-border-terminal: #1F2937;
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #94A3B8;
-  --color-text-muted: #64748B;
+  --color-bg-terminal: #111111;
+  --color-surface-terminal: #1A1A1A;
+  --color-surface-elevated: #222222;
+  --color-border-terminal: #2D2D2D;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #B5B5B5;
   
-  --color-accent-terminal: #10B981;
-  --color-accent-hover: #34D399;
+  --color-accent-terminal: #C0C0C0;
+  --color-accent-hover: #E5E5E5;
   
-  --color-success-terminal: #22C55E;
-  --color-warning-terminal: #F59E0B;
-  --color-danger-terminal: #EF4444;
+  --color-success-terminal: #2ECC71;
+  --color-warning-terminal: #F39C12;
+  --color-danger-terminal: #E74C3C;
   
-  --font-sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --color-hover-surface: #222222;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 html, body {
   margin: 0;
   padding: 0;
-  background-color: #0F172A;
-  color: #F8FAFC;
-  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  background-color: #111111;
+  color: #FFFFFF;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -38,16 +40,16 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0F172A;
+  background: #111111;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1F2937;
+  background: #2D2D2D;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #374151;
+  background: #222222;
 }
 
 /* Professional Animations */
@@ -63,7 +65,7 @@ html, body {
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -83,13 +85,13 @@ html, body {
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-fadeInUp {
-  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-slideIn {
-  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
