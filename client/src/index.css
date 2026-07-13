@@ -3,34 +3,42 @@
 
 /* Design System Color Tokens for Premium Institutional Finance Platform */
 @theme {
-  --color-bg-terminal: #111111;
-  --color-surface-terminal: #1A1A1A;
-  --color-surface-elevated: #222222;
-  --color-border-terminal: #2D2D2D;
+  --color-bg-terminal: #0F1115;
+  --color-surface-terminal: #171A21;
+  --color-surface-elevated: #1E232D;
+  --color-border-terminal: rgba(255,255,255,0.06);
   --color-text-primary: #FFFFFF;
-  --color-text-secondary: #B5B5B5;
+  --color-text-secondary: #D1D5DB;
   
-  --color-accent-terminal: #C0C0C0;
-  --color-accent-hover: #E5E5E5;
+  --color-accent-terminal: #F5F5F5;
+  --color-accent-hover: #FFFFFF;
   
-  --color-success-terminal: #2ECC71;
-  --color-warning-terminal: #F39C12;
-  --color-danger-terminal: #E74C3C;
+  --color-success-terminal: #22C55E;
+  --color-warning-terminal: #F59E0B;
+  --color-danger-terminal: #EF4444;
   
-  --color-hover-surface: #222222;
+  --color-hover-surface: #1E232D;
   
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-html, body {
-  margin: 0;
-  padding: 0;
-  background-color: #111111;
-  color: #FFFFFF;
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #0F1115;
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Link Resets to prevent browser visited state overrides */
+  a, a:visited {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* Custom Scrollbars */
@@ -40,16 +48,16 @@ html, body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #111111;
+  background: #0F1115;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2D2D2D;
+  background: rgba(255,255,255,0.06);
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #222222;
+  background: #171A21;
 }
 
 /* Professional Animations */
