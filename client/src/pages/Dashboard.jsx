@@ -111,7 +111,7 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2" data-html2canvas-ignore="true">
-                <ExportPdfButton elementId="pdf-export-area" fileName={`${analysis.ticker}-Analysis-Report`} />
+                <ExportPdfButton analysis={analysis} fileName={`${analysis.ticker}-Analysis-Report`} />
                 <Link
                   to="/"
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#F5F5F5] text-[#0F1115] font-sans font-bold text-[10px] uppercase tracking-wider hover:bg-[#FFFFFF] hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 shadow-sm"
