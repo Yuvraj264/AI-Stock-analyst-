@@ -29,7 +29,7 @@ export const Sidebar = () => {
     { name: 'History', path: '/history', icon: History, enabled: true },
     { name: 'Compare', path: '/compare', icon: Columns, enabled: true },
     { name: 'Watchlist', path: '/watchlist', icon: Bookmark, enabled: true },
-    { name: 'Settings', path: '#', icon: Settings, enabled: false }
+    { name: 'Settings', path: '/settings', icon: Settings, enabled: true }
   ];
 
   return (

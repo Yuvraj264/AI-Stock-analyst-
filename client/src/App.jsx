@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard.jsx';
 import History from './pages/History.jsx';
 import Compare from './pages/Compare.jsx';
 import Watchlist from './pages/Watchlist.jsx';
+import Settings from './pages/Settings.jsx';
 import { ToastProvider } from './components/Toast.jsx';
 
 /**
@@ -28,6 +29,7 @@ function App() {
               <Route path="/history" element={<History />} />
               <Route path="/compare" element={<Compare />} />
               <Route path="/watchlist" element={<Watchlist />} />
+              <Route path="/settings" element={<Settings />} />
             </Routes>
           </div>
         </div>
