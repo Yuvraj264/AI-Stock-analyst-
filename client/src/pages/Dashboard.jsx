@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useAnalysis } from '../hooks/useAnalysis.js';
+import { useToast } from '../components/Toast.jsx';
 import { ScoreCard } from '../components/ScoreCard.jsx';
 import { RecommendationCard } from '../components/RecommendationCard.jsx';
 import { StrengthsCard } from '../components/StrengthsCard.jsx';
@@ -54,9 +55,10 @@ const sampleData = {
  * Analytical Dashboard.
  * Formatted as a multi-pane equity research workspace in Slate + Platinum theme.
  */
-export const Dashboard = () => {
+export const Dashboard = ({ watchlist = [], setWatchlist }) => {
   const location = useLocation();
   const { history, fetchHistory } = useAnalysis();
+  const { addToast } = useToast();
 
   useEffect(() => {
     fetchHistory();
@@ -65,6 +67,27 @@ export const Dashboard = () => {
   // Extract from react-router navigation location state
   const stateData = location.state?.analysis;
   const analysis = stateData || sampleData;
+
+  const isSaved = watchlist.some((item) => item.ticker === analysis.ticker);
+
+  const handleWatchlistToggle = () => {
+    if (isSaved) {
+      setWatchlist((prev) => prev.filter((item) => item.ticker !== analysis.ticker));
+      addToast(`Removed ${analysis.companyName} (${analysis.ticker}) from Watchlist`, 'success');
+    } else {
+      const newItem = {
+        id: `w-${Date.now()}`,
+        companyName: analysis.companyName,
+        ticker: analysis.ticker,
+        recommendation: analysis.recommendation || 'HOLD',
+        overallScore: analysis.finalScore || analysis.consensusScore || 75,
+        confidence: analysis.confidence || 0.75,
+        timestamp: new Date().toISOString()
+      };
+      setWatchlist((prev) => [...prev, newItem]);
+      addToast(`Added ${analysis.companyName} (${analysis.ticker}) to Watchlist`, 'success');
+    }
+  };
 
   const metrics = analysis.financialData?.metrics || {};
   const historicalData = analysis.financialData?.historical || [];
@@ -111,6 +134,16 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-center gap-2" data-html2canvas-ignore="true">
+                <button
+                  onClick={handleWatchlistToggle}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border font-sans font-bold text-[10px] uppercase tracking-wider transition-all duration-150 shadow-sm cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
+                    isSaved
+                      ? 'bg-[#1E232D] border-white/10 text-[#FFFFFF] hover:bg-[#1E232D]/80'
+                      : 'bg-[#171A21] border-white/5 text-[#9AA4B2] hover:text-[#FFFFFF] hover:border-white/35'
+                  }`}
+                >
+                  {isSaved ? '★ In Watchlist' : '☆ Add to Watchlist'}
+                </button>
                 <ExportPdfButton analysis={analysis} fileName={`${analysis.ticker}-Analysis-Report`} />
                 <Link
                   to="/"

@@ -15,76 +15,10 @@ import {
   X
 } from 'lucide-react';
 
-const INITIAL_WATCHLIST = [
-  {
-    id: 'w1',
-    companyName: 'NVIDIA Corporation',
-    ticker: 'NVDA',
-    recommendation: 'INVEST',
-    consensusScore: 88,
-    confidence: 0.90,
-    lastUpdated: '2026-07-17T12:00:00.000Z'
-  },
-  {
-    id: 'w2',
-    companyName: 'Microsoft Corporation',
-    ticker: 'MSFT',
-    recommendation: 'INVEST',
-    consensusScore: 82,
-    confidence: 0.85,
-    lastUpdated: '2026-07-16T15:30:00.000Z'
-  },
-  {
-    id: 'w3',
-    companyName: 'Tesla, Inc.',
-    ticker: 'TSLA',
-    recommendation: 'HOLD',
-    consensusScore: 55,
-    confidence: 0.70,
-    lastUpdated: '2026-07-15T09:15:00.000Z'
-  },
-  {
-    id: 'w4',
-    companyName: 'Apple Inc.',
-    ticker: 'AAPL',
-    recommendation: 'INVEST',
-    consensusScore: 80,
-    confidence: 0.88,
-    lastUpdated: '2026-07-17T10:45:00.000Z'
-  },
-  {
-    id: 'w5',
-    companyName: 'Intel Corporation',
-    ticker: 'INTC',
-    recommendation: 'PASS',
-    consensusScore: 35,
-    confidence: 0.75,
-    lastUpdated: '2026-07-14T08:00:00.000Z'
-  }
-];
-
-export const Watchlist = () => {
+export const Watchlist = ({ watchlist = [], setWatchlist }) => {
   const navigate = useNavigate();
   const { addToast } = useToast();
   const { history, fetchHistory, performAnalysis } = useAnalysis();
-
-  // Watchlist Items State (Persisted in localStorage)
-  const [watchlist, setWatchlist] = useState(() => {
-    const saved = localStorage.getItem('watchlist_items');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        console.error('Failed to parse watchlist items from localStorage', e);
-      }
-    }
-    return INITIAL_WATCHLIST;
-  });
-
-  // Save watchlist items on state change
-  useEffect(() => {
-    localStorage.setItem('watchlist_items', JSON.stringify(watchlist));
-  }, [watchlist]);
 
   // Load history logs on mount to enable autocomplete / filling from history
   useEffect(() => {
@@ -161,13 +95,13 @@ export const Watchlist = () => {
       companyName: companyTrimmed,
       ticker: tickerUpper,
       recommendation: formRecommendation,
-      consensusScore: Number(formScore),
+      overallScore: Number(formScore),
       confidence: Number(formConfidence) / 100,
-      lastUpdated: new Date().toISOString()
+      timestamp: new Date().toISOString()
     };
 
     setWatchlist([newItem, ...watchlist]);
-    addToast(`Successfully added ${tickerUpper} to watchlist.`, 'success');
+    addToast(`Added ${companyTrimmed} (${tickerUpper}) to Watchlist`, 'success');
     
     // Reset Form & Close Modal
     setFormTicker('');
@@ -195,10 +129,10 @@ export const Watchlist = () => {
   };
 
   // Remove Item from Watchlist
-  const handleRemoveStock = (id, ticker) => {
+  const handleRemoveStock = (id, ticker, companyName) => {
     if (window.confirm(`Are you sure you want to remove ${ticker} from your watchlist?`)) {
       setWatchlist(watchlist.filter(item => item.id !== id));
-      addToast(`${ticker} removed from watchlist.`, 'success');
+      addToast(`Removed ${companyName} (${ticker}) from Watchlist`, 'success');
     }
   };
 
@@ -261,6 +195,15 @@ export const Watchlist = () => {
       filtered.sort((a, b) => {
         let aVal = a[sortConfig.key];
         let bVal = b[sortConfig.key];
+
+        // Normalise fields
+        if (sortConfig.key === 'overallScore') {
+          aVal = a.overallScore ?? a.consensusScore ?? a.finalScore ?? 0;
+          bVal = b.overallScore ?? b.consensusScore ?? b.finalScore ?? 0;
+        } else if (sortConfig.key === 'timestamp') {
+          aVal = a.timestamp ?? a.lastUpdated ?? a.createdAt ?? '';
+          bVal = b.timestamp ?? b.lastUpdated ?? b.createdAt ?? '';
+        }
 
         // Format strings for case-insensitive sort
         if (typeof aVal === 'string') {
@@ -412,15 +355,15 @@ export const Watchlist = () => {
                 <tr className="border-b border-white/5 bg-[#0F1115]/40 text-[#9AA4B2] font-bold uppercase tracking-wider select-none">
                   <th 
                     className="p-4 text-[10px] cursor-pointer hover:text-[#FFFFFF] transition-colors group"
-                    onClick={() => requestSort('ticker')}
-                  >
-                    Ticker {renderSortIndicator('ticker')}
-                  </th>
-                  <th 
-                    className="p-4 text-[10px] cursor-pointer hover:text-[#FFFFFF] transition-colors group"
                     onClick={() => requestSort('companyName')}
                   >
                     Company {renderSortIndicator('companyName')}
+                  </th>
+                  <th 
+                    className="p-4 text-[10px] cursor-pointer hover:text-[#FFFFFF] transition-colors group"
+                    onClick={() => requestSort('ticker')}
+                  >
+                    Ticker {renderSortIndicator('ticker')}
                   </th>
                   <th 
                     className="p-4 text-[10px] cursor-pointer hover:text-[#FFFFFF] transition-colors group"
@@ -430,9 +373,9 @@ export const Watchlist = () => {
                   </th>
                   <th 
                     className="p-4 text-[10px] text-center cursor-pointer hover:text-[#FFFFFF] transition-colors group"
-                    onClick={() => requestSort('consensusScore')}
+                    onClick={() => requestSort('overallScore')}
                   >
-                    Consensus Score {renderSortIndicator('consensusScore')}
+                    Score {renderSortIndicator('overallScore')}
                   </th>
                   <th 
                     className="p-4 text-center text-[10px] cursor-pointer hover:text-[#FFFFFF] transition-colors group"
@@ -442,30 +385,33 @@ export const Watchlist = () => {
                   </th>
                   <th 
                     className="p-4 text-[10px] cursor-pointer hover:text-[#FFFFFF] transition-colors group"
-                    onClick={() => requestSort('lastUpdated')}
+                    onClick={() => requestSort('timestamp')}
                   >
-                    Last Updated {renderSortIndicator('lastUpdated')}
+                    Date Added {renderSortIndicator('timestamp')}
                   </th>
                   <th className="p-4 text-[10px] text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 text-[#9AA4B2] font-medium">
                 {filteredSortedWatchlist.map((item) => {
-                  const formattedDate = new Date(item.lastUpdated).toLocaleDateString('en-US', {
+                  const rawDate = item.timestamp || item.lastUpdated || item.createdAt;
+                  const formattedDate = new Date(rawDate).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric'
                   });
+
+                  const displayScore = item.overallScore ?? item.consensusScore ?? item.finalScore ?? 0;
 
                   return (
                     <tr
                       key={item.id}
                       className="hover:bg-[#0F1115]/30 transition-colors duration-100"
                     >
-                      <td className="p-4 font-mono font-bold text-[#F5F5F5]">{item.ticker}</td>
                       <td className="p-4 font-semibold text-[#FFFFFF] truncate max-w-[200px]">
                         {item.companyName}
                       </td>
+                      <td className="p-4 font-mono font-bold text-[#F5F5F5]">{item.ticker}</td>
                       <td className="p-4 font-bold text-[10px]">
                         <span className={`inline-flex px-2 py-0.5 rounded border ${getRecStyle(item.recommendation)}`}>
                           {item.recommendation}
@@ -473,7 +419,7 @@ export const Watchlist = () => {
                       </td>
                       <td className="p-4 text-center font-bold text-[#FFFFFF]">
                         <div className="inline-flex items-center justify-center h-7 w-7 rounded bg-[#1E232D] border border-white/5 font-mono">
-                          {item.consensusScore}
+                          {displayScore}
                         </div>
                       </td>
                       <td className="p-4 text-center font-semibold text-[#D1D5DB]">
@@ -488,10 +434,10 @@ export const Watchlist = () => {
                             title="Trigger AI Consensus Analysis"
                           >
                             <Brain className="h-3 w-3" />
-                            Analyze
+                            Analyze Again
                           </button>
                           <button
-                            onClick={() => handleRemoveStock(item.id, item.ticker)}
+                            onClick={() => handleRemoveStock(item.id, item.ticker, item.companyName)}
                             className="p-1.5 border border-white/5 bg-[#0F1115] hover:bg-[#EF4444]/10 text-[#EF4444] hover:border-[#EF4444]/30 rounded-md transition-all cursor-pointer"
                             title="Remove from Watchlist"
                           >

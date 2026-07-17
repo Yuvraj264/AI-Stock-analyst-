@@ -17,7 +17,7 @@ import {
  * Premium Sidebar Navigation.
  * Tailored for a luxury hedge-fund terminal aesthetic.
  */
-export const Sidebar = () => {
+export const Sidebar = ({ watchlistCount = 0 }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -28,7 +28,7 @@ export const Sidebar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: BarChart3, enabled: true },
     { name: 'History', path: '/history', icon: History, enabled: true },
     { name: 'Compare', path: '/compare', icon: Columns, enabled: true },
-    { name: 'Watchlist', path: '/watchlist', icon: Bookmark, enabled: true },
+    { name: `Watchlist (${watchlistCount})`, path: '/watchlist', icon: Bookmark, enabled: true },
     { name: 'Settings', path: '/settings', icon: Settings, enabled: true }
   ];
 
