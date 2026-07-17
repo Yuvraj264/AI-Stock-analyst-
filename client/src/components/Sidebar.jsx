@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
-  Activity, 
+  Brain, 
   Search, 
   BarChart3, 
   History, 
@@ -28,7 +28,7 @@ export const Sidebar = () => {
     { name: 'Dashboard', path: '/dashboard', icon: BarChart3, enabled: true },
     { name: 'History', path: '/history', icon: History, enabled: true },
     { name: 'Compare', path: '/compare', icon: Columns, enabled: true },
-    { name: 'Watchlist', path: '#', icon: Bookmark, enabled: false },
+    { name: 'Watchlist', path: '/watchlist', icon: Bookmark, enabled: true },
     { name: 'Settings', path: '#', icon: Settings, enabled: false }
   ];
 
@@ -38,7 +38,7 @@ export const Sidebar = () => {
       <div className="flex h-14 w-full items-center justify-between px-4 bg-[#171A21] border-b border-white/5 md:hidden shrink-0">
         <Link to="/" className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded bg-[#F5F5F5] text-[#0F1115]">
-            <Activity className="h-4 w-4" />
+            <Brain className="h-4 w-4" />
           </div>
           <span className="font-bold text-sm font-sans tracking-tight">Equity<span className="text-[#9AA4B2]">Mind</span></span>
         </Link>
@@ -70,7 +70,7 @@ export const Sidebar = () => {
           <div className="h-16 flex items-center px-6 border-b border-white/5">
             <Link to="/" className="flex items-center gap-2.5" onClick={() => setIsOpen(false)}>
               <div className="flex h-8 w-8 items-center justify-center rounded-md bg-[#F5F5F5] text-[#0F1115] shadow-sm">
-                <Activity className="h-4.5 w-4.5" />
+                <Brain className="h-4.5 w-4.5" />
               </div>
               <span className="font-bold text-base font-sans tracking-tight">
                 Equity<span className="text-[#9AA4B2]">Mind</span>
